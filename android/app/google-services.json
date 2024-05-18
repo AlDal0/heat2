@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "375686752503",
+    "project_id": "heat-e9529",
+    "storage_bucket": "heat-e9529.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375686752503:android:28658e466c6884bf1d0bf2",
+        "android_client_info": {
+          "package_name": "com.example.heat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375686752503-0lrkib0sord75mk5kfgfo1irrt07p58a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.heat",
+            "certificate_hash": "f9a2d994aafbeedfa6e84a023857a6af8f6c6e9a"
+          }
+        },
+        {
+          "client_id": "375686752503-aha5sfjcvvpb4lu187cre34hds1vktmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb7eJj_fHQWXGJi7V62QImzzHWgqRz8M0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375686752503-aha5sfjcvvpb4lu187cre34hds1vktmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "375686752503-4irl22q2mdivaknumaj3hnjqdv0rvk6p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.heat.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375686752503:android:ec819f6083a288921d0bf2",
+        "android_client_info": {
+          "package_name": "com.example.u_new"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375686752503-aha5sfjcvvpb4lu187cre34hds1vktmq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb7eJj_fHQWXGJi7V62QImzzHWgqRz8M0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375686752503-aha5sfjcvvpb4lu187cre34hds1vktmq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "375686752503-4irl22q2mdivaknumaj3hnjqdv0rvk6p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.heat.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
