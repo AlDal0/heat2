@@ -17,10 +17,10 @@ List<Event> chambreList = [];
 List<String> chambreSelectedList = [];
 List<DateTime> resaDateList = [];
 final kToday = DateTime.now();
-final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
-final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
+final kFirstDay = DateTime(kToday.year, kToday.month - 1, kToday.day);
+final kLastDay = DateTime(kToday.year + 5, kToday.month, kToday.day);
 
-ScrollController _mainController = new ScrollController();
+ScrollController _mainController = ScrollController();
 
 
 var result;
@@ -88,9 +88,9 @@ Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData)
       List<Event> resaMappingVar = [Event('chambre')];
       List<DateTime> dateRange = [];
 
-      final Map<DateTime, List<Event>> date_chambre = {DateTime(2021,1,1): resaMappingVar};
+      final Map<DateTime, List<Event>> dateChambre = {DateTime(2021,1,1): resaMappingVar};
 
-      date_chambre.remove(DateTime(2021,1,1));
+      dateChambre.remove(DateTime(2021,1,1));
 
       for (var j = 0; j < resaDateList.length; j++) { 
 
@@ -123,11 +123,11 @@ Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData)
 
       }
 
-      date_chambre[resaDateList[j]] = resaMappingVar;
+      dateChambre[resaDateList[j]] = resaMappingVar;
 
       }
 
-    return date_chambre;
+    return dateChambre;
     
   }
 
@@ -477,12 +477,12 @@ class _ResaChambreState extends State<ResaChambre> {
     }
   }
 
-  Future<DateTime?> _selectDate(BuildContext context, DateTime? date_selected) async {
+  Future<DateTime?> _selectDate(BuildContext context, DateTime? dateSelected) async {
     var datePicked = await DatePicker.showSimpleDatePicker(
       context,
-      initialDate: date_selected,
-      firstDate: DateTime(2023),
-      lastDate: DateTime(2024),
+      initialDate: dateSelected,
+      firstDate: DateTime(2024),
+      lastDate: DateTime(2030),
       dateFormat: "dd-MMMM-yyyy",
       locale: DateTimePickerLocale.fr,
       looping: true,
@@ -491,7 +491,7 @@ class _ResaChambreState extends State<ResaChambre> {
     return datePicked;
   }
 
-  Widget _getListDateContainer(BuildContext context, int index, List<DateTime?> date_selected) {
+  Widget _getListDateContainer(BuildContext context, int index, List<DateTime?> dateSelected) {
 
     var a =['Début : ','Fin : '];
 
@@ -499,11 +499,11 @@ class _ResaChambreState extends State<ResaChambre> {
         onTap: () async {
        
 
-          date_selected[index] = await _selectDate(context,date_selected[index]);
+          dateSelected[index] = await _selectDate(context,dateSelected[index]);
 
           if (index == 0) {
-            if (date_selected[index] != null) {
-              _onRangeSelected(date_selected[index], _rangeEnd, _focusedDay);
+            if (dateSelected[index] != null) {
+              _onRangeSelected(dateSelected[index], _rangeEnd, _focusedDay);
             }
 
             else {
@@ -515,8 +515,8 @@ class _ResaChambreState extends State<ResaChambre> {
           }
 
           else {
-            if (date_selected[index] != null) {
-              _onRangeSelected(_rangeStart, date_selected[index], _focusedDay);
+            if (dateSelected[index] != null) {
+              _onRangeSelected(_rangeStart, dateSelected[index], _focusedDay);
             }
 
             else {
@@ -548,7 +548,7 @@ class _ResaChambreState extends State<ResaChambre> {
               children: [
                 const Icon(Icons.arrow_right_outlined, color: Colors.white),
                 Text(a[index],style: const TextStyle(color: Colors.white)),
-                Text('${date_selected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(8,10)} / ${date_selected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(5,7)} / ${date_selected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(0,4)}', style: const TextStyle(color: Colors.white))
+                Text('${dateSelected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(8,10)} / ${dateSelected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(5,7)} / ${dateSelected[index].toString().replaceFirstMapped(' 00:00:00.000Z', (match) => '').substring(0,4)}', style: const TextStyle(color: Colors.white))
               ])
         )
     );
@@ -672,8 +672,8 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
 
     var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
 
-    var clientNameEmail;
-    var clientSurnameEmail;
+    String clientNameEmail = "";
+    String clientSurnameEmail = "";
 
     dateRange.add(date);
 
@@ -759,7 +759,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Réservation chez Heat du $dateStartEmail au $dateEndEmail confirmée',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Merci $clientSurnameEmail pour votre réservation !</h1> <br> Date début : $dateStartEmail <br></br> Date fin : $dateEndEmail <br></br> Chambres : ${chambreSelectedListToBook.join(', ')}</body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Merci $clientSurnameEmail $clientNameEmail votre réservation !</h1> <br> Date début : $dateStartEmail <br></br> Date fin : $dateEndEmail <br></br> Chambres : ${chambreSelectedListToBook.join(', ')}</body></code>',
       }
     });
     
