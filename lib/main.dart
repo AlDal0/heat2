@@ -1,12 +1,12 @@
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'accueil_copy.dart';
+import 'home.dart';
 import 'login_screen.dart';
-import 'actualite.dart';
-import 'resaChambres.dart';
-import 'resaRestauration.dart';
-import 'mesReservations.dart';
+import 'news.dart';
+import 'resaRoom.dart';
+import 'resaMenu.dart';
+import 'myReservation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -33,11 +33,11 @@ void main() async {
               routes: {
                 // When navigating to the "/" route, build the FirstScreen widget.
                 '/login': (context) => const LoginScreen(),
-                '/accueil': (context) => const Accueil(),
-                '/actualite': (context) => const Actualite(),
-                '/resachambres': (context) => const ResaChambreHome(),
-                '/resarestauration': (context) => const ResaRestauration(),
-                '/mesreservations': (context) => const MesReservationsHome(),
+                '/home': (context) => const Accueil(),
+                '/news': (context) => const Actualite(),
+                '/rooms': (context) => const ResaRoomHome(),
+                '/menus': (context) => const ResaRestauration(),
+                '/reservations': (context) => const MesReservationsHome(),
               },
             ),
           )

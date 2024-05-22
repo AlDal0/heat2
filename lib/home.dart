@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'actualite.dart';
-import 'resaChambres.dart';
-import 'resaRestauration.dart';
-import 'mesReservations.dart';
+import 'news.dart';
+import 'resaRoom.dart';
+import 'resaMenu.dart';
+import 'myReservation.dart';
 
 class Accueil extends StatelessWidget {
   const Accueil({super.key});
@@ -14,7 +12,7 @@ class Accueil extends StatelessWidget {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Accueil'),
+        title: const Text('Home'),
       ),
       body:
         Center(
@@ -31,7 +29,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const Actualite()),
                 );
               },
-              child: const Text('Actualité'),
+              child: const Text('News'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -41,10 +39,10 @@ class Accueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ResaChambreHome()),
+                  MaterialPageRoute(builder: (context) => const ResaRoomHome()),
                 );
               },
-              child: const Text('Chambres'),
+              child: const Text('Rooms'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -57,7 +55,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const ResaRestauration()),
                 );
               },
-              child: const Text('Restauration'),
+              child: const Text('Menus'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -70,7 +68,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const MesReservationsHome()),
                 );
               },
-              child: const Text('Mes Réservations'),
+              child: const Text('Reservations'),
             ),
           ]
         ),
@@ -99,58 +97,58 @@ class Accueil extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Accueil'),
+              title: const Text('Home'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/accueil');
+                      Navigator.pushNamed(context, '/home');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Mes Réservations'),
+              title: const Text('Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/mesreservations');
+                Navigator.pushNamed(context, '/reservations');
               },
             ),
             ListTile(
               leading: const Icon(Icons.newspaper),
-              title: const Text('Actualité'),
+              title: const Text('News'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/actualite');
+                      Navigator.pushNamed(context, '/news');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Chambres'),
+              title: const Text('Rooms'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resachambres');
+                Navigator.pushNamed(context, '/rooms');
                
                 //Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.local_restaurant),
-              title: const Text('Restauration'),
+              title: const Text('Menus'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/resarestauration');
+                Navigator.pushNamed(context, '/menus');
               },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Déconnexion'),
+              title: const Text('Log out'),
               onTap: () {
                 // Update the state of the app
                 // ...

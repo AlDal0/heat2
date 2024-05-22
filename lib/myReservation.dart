@@ -22,7 +22,7 @@ class MesReservationsHome extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Mes Réservations'),
+          title: const Text('My Reservation'),
           scrolledUnderElevation: 0),
         body: const MesReservations(),
         drawer: Drawer(
@@ -49,58 +49,58 @@ class MesReservationsHome extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Accueil'),
+              title: const Text('Home'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/accueil');
+                      Navigator.pushNamed(context, '/home');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Mes Réservations'),
+              title: const Text('Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/mesreservations');
+                Navigator.pushNamed(context, '/reservations');
               },
             ),
             ListTile(
               leading: const Icon(Icons.newspaper),
-              title: const Text('Actualité'),
+              title: const Text('News'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/actualite');
+                      Navigator.pushNamed(context, '/news');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Chambres'),
+              title: const Text('Rooms'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resachambres');
+                Navigator.pushNamed(context, '/rooms');
                
                 //Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.local_restaurant),
-              title: const Text('Restauration'),
+              title: const Text('Menus'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/resarestauration');
+                Navigator.pushNamed(context, '/menus');
               },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Déconnexion'),
+              title: const Text('Log out'),
               onTap: () {
                 // Update the state of the app
                 // ...
@@ -126,7 +126,7 @@ class MesReservations extends StatefulWidget {
 class _MesReservationsState extends State<MesReservations> {
   final Stream<QuerySnapshot> clientStream = FirebaseFirestore.instance.collection('client').where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid).snapshots();
   
-  final Stream<QuerySnapshot> chambreStream = FirebaseFirestore.instance.collection('chambre').snapshots();
+  final Stream<QuerySnapshot> roomStream = FirebaseFirestore.instance.collection('room').snapshots();
 
   
   @override
@@ -161,19 +161,19 @@ class _MesReservationsState extends State<MesReservations> {
 
 
             return StreamBuilder<QuerySnapshot>(
-              stream: chambreStream,
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> chambreSnapshot) {
+              stream: roomStream,
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> roomSnapshot) {
             
-                if (chambreSnapshot.hasError) {
+                if (roomSnapshot.hasError) {
                   return const Text('Something went wrong');
                 }
 
-                if (!chambreSnapshot.hasData) {
+                if (!roomSnapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                 final reservationData = reservationSnapshot.requireData;
-                final chambreData = chambreSnapshot.requireData;
+                final roomData = roomSnapshot.requireData;
 
                 final ScrollController scrollController = ScrollController();
 
@@ -191,16 +191,16 @@ class _MesReservationsState extends State<MesReservations> {
                     
                       var tempList = [];
 
-                      for (var j = 0; j < reservationData.docs[index].get('chambre').length; j++) {
+                      for (var j = 0; j < reservationData.docs[index].get('room').length; j++) {
 
-                      for (var element in chambreData.docs) {
-                        if (element.id == reservationData.docs[index].get('chambre')[j].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(chambre/', (match) => '').replaceAllMapped(')', (match) => '')) {
-                          tempList.add(element.get('nom'));
+                      for (var element in roomData.docs) {
+                        if (element.id == reservationData.docs[index].get('room')[j].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(room/', (match) => '').replaceAllMapped(')', (match) => '')) {
+                          tempList.add(element.get('name'));
                         }
                       }
                       }
                       
-                      return ResaContent(context: context,index: index,reservationData: reservationData, chambreData: chambreData, tempList: tempList);
+                      return ResaContent(context: context,index: index,reservationData: reservationData, roomData: roomData, tempList: tempList);
                     }
                 )
                 );
@@ -215,24 +215,24 @@ class _MesReservationsState extends State<MesReservations> {
 }
 
 class ResaContent extends StatelessWidget {
-  const ResaContent({super.key, required this.context, required this.index, required this.reservationData, required this.chambreData, required this.tempList});
+  const ResaContent({super.key, required this.context, required this.index, required this.reservationData, required this.roomData, required this.tempList});
 
   final BuildContext context;
   final int index;
   final dynamic reservationData;
-  final dynamic chambreData;
+  final dynamic roomData;
   final List<dynamic> tempList;
 
-  Future<String> getChambreImages(String chambreSelectedToGetImage, chambreSnapshotData) async {
+  Future<String> getRoomImages(String roomSelectedToGetImage, roomSnapshotData) async {
 
   imgList = '';
 
-  for (final document in chambreSnapshotData.docs) {
+  for (final document in roomSnapshotData.docs) {
     var data = document.data();
 
    
 
-      if (data['nom'].toString() == chambreSelectedToGetImage) {
+      if (data['name'].toString() == roomSelectedToGetImage) {
 
         try {
 
@@ -266,7 +266,7 @@ class ResaContent extends StatelessWidget {
     final tsdateEnd = DateFormat.yMMMMd('fr_FR').format(reservationData.docs[index].data()['dateEnd'].toDate());
 
     return FutureBuilder<String>(
-      future: getChambreImages(tempList[0].toString(), chambreData),
+      future: getRoomImages(tempList[0].toString(), roomData),
       builder: (context, AsyncSnapshot<String> snapshot){
          if (snapshot.hasData) {
           return SafeArea(
@@ -335,12 +335,12 @@ class ResaContent extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.only(bottom: 8),
                                     child: Text(
-                                      //'Chambres : ${tempList.join(', ')}',
-                                      'Réservation : ${reservationData.docs[index].id}',
+                                      //'Rooms : ${tempList.join(', ')}',
+                                      'Reservation : ${reservationData.docs[index].id}',
                                       style: descriptionStyle.copyWith(color: Colors.black54),
                                     ),
                                   ),
-                                  Text('Début : $tsdateStart -> Fin : $tsdateEnd'),
+                                  Text('Start : $tsdateStart -> End : $tsdateEnd'),
                                   //Text('Fin : $tsdateEnd'),
                                 ],
                               ),

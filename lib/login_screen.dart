@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:heat/accueil_copy.dart';
+import 'package:heat/home.dart';
 import 'register_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       
       appBar: AppBar(
-        title: const Text('Connexion'),
+        title: const Text('Log in'),
         automaticallyImplyLeading: false
       ),
       backgroundColor: Colors.grey[200],
@@ -88,7 +88,7 @@ class _SignUpFormState extends State<LoginForm> {
                 ScaffoldMessenger.of(context)
                   .showSnackBar(
                     const SnackBar(
-                      content: Text("Connecté avec succès"),
+                      content: Text("Successfully logged in"),
                     ),
                   )
                   .closed;
@@ -99,7 +99,7 @@ class _SignUpFormState extends State<LoginForm> {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(
                       const SnackBar(
-                        content: Text('Erreur dans les informations soumises'),
+                        content: Text('Wrong data submitted'),
                       ),
                     )
                     .closed;
@@ -117,7 +117,7 @@ class _SignUpFormState extends State<LoginForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           LinearProgressIndicator(value: _formProgress),
-          const Text('Connexion',
+          const Text('Log in',
             style: TextStyle(fontSize: 25, color: Colors.white)
           ),
           Padding(
@@ -128,7 +128,7 @@ class _SignUpFormState extends State<LoginForm> {
               style: const TextStyle(color: Colors.white),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                return 'Veuillez entrer du texte';
+                return 'Please enter some text';
                 }
                 return null;
               },
@@ -143,7 +143,7 @@ class _SignUpFormState extends State<LoginForm> {
               obscureText: passwordVisible,
               //keyboardType: TextInputType.,
               decoration: InputDecoration(
-                hintText: 'Mot de passe',
+                hintText: 'Password',
                 hintStyle: const TextStyle(color: Colors.white),
                 suffixIcon: IconButton(
                      icon: Icon(passwordVisible
@@ -160,7 +160,7 @@ class _SignUpFormState extends State<LoginForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                return 'Veuillez entrer du texte';
+                return 'Please enter some text';
                 }
                 return null;
               },
@@ -180,7 +180,7 @@ class _SignUpFormState extends State<LoginForm> {
               }),
             ),
             onPressed: signIn,
-            child: const Text('Connexion'),
+            child: const Text('Log in'),
           ),
           const Divider(
               color: Colors.grey
@@ -207,7 +207,7 @@ class _SignUpFormState extends State<LoginForm> {
                 builder: (context) => const RegisterScreen(),
                 ),),
               ),
-              child: const Text('Inscription'),
+              child: const Text('Sign up'),
             ),
           ),
         ],

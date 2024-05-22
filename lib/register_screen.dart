@@ -7,9 +7,49 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:heat/login_screen.dart';
 //import 'firebase_options.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore db = FirebaseFirestore.instance;
+
+Future<void> createLagoCustomer(String uid, String firstName, String surname, String email) async {
+
+  var data = {
+   "customer": {
+      "external_id": uid,
+      "currency": "EUR",
+      "email": email,
+      "name": "$firstName $surname"
+   }
+  };
+
+  final String jsonString = jsonEncode(data);
+
+  //final response = await http.get(
+  //  Uri.parse('http://localhost:3000/api/v1/customers/cus01'));
+
+  final response = await http.post(
+    Uri.parse("http://localhost:3000/api/v1/customers"),
+    headers: <String, String>{
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ff446403-d8d3-44bf-b1cc-88a1c31722f7"
+    },
+    body: jsonString,
+  );
+
+  if (response.statusCode == 200) {
+    // If the server did return a 201 CREATED response,
+    // then parse the JSON.
+    print(response.body);
+    return jsonDecode(response.body);
+  } else {
+    // If the server did not return a 201 CREATED response,
+    // then throw an exception.
+    print(jsonDecode(response.body));
+    throw Exception('Failed to create user.');
+  }
+}
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -25,7 +65,7 @@ class RegisterScreen extends StatelessWidget {
      
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: const Text('Inscription'),
+        title: const Text('Registration'),
       ),
       backgroundColor: Colors.grey[200],
       body: Container(
@@ -84,6 +124,8 @@ class _SignUpFormState extends State<RegisterForm> {
 
                 client = value.user;
 
+                await createLagoCustomer(client.uid, _firstNameTextController.text, _lastNameTextController.text, _emailTextController.text);
+
                 db
                   .collection("client")
                   .add({
@@ -98,6 +140,7 @@ class _SignUpFormState extends State<RegisterForm> {
                       'subject': 'Bienvenue chez Heat ${_firstNameTextController.text} !',
                       'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Bravo ${_firstNameTextController.text} !</h1> <br> Votre compte chez Heat est bien créé. <br> Vous pouvez désormais vous connecter avec votre email et votre mot de passe afin de réaliser votre première réservation.</body></code>',
                     }});
+
                   Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -107,7 +150,7 @@ class _SignUpFormState extends State<RegisterForm> {
                   ScaffoldMessenger.of(context)
                     .showSnackBar(
                       const SnackBar(
-                        content: Text("Inscription validée"),
+                        content: Text("Successfully registered"),
                       ),
                     )
                     .closed;
@@ -137,16 +180,16 @@ class _SignUpFormState extends State<RegisterForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Saisie des informations', style: TextStyle(fontSize: 25, color: Colors.white)),
+          const Text('Please enter information:', style: TextStyle(fontSize: 20, color: Colors.white)),
           Padding(
             padding: const EdgeInsets.all(8),
             child: TextFormField(
               controller: _firstNameTextController,
-              decoration: const InputDecoration(hintText: 'Prénom', hintStyle: TextStyle(color: Colors.white)),
+              decoration: const InputDecoration(hintText: 'Firstname', hintStyle: TextStyle(color: Colors.white)),
               style: const TextStyle(color: Colors.white),
               validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer du texte';
+                return 'Please enter some text';
               }
               return null;
             },
@@ -156,11 +199,11 @@ class _SignUpFormState extends State<RegisterForm> {
             padding: const EdgeInsets.all(8),
             child: TextFormField(
               controller: _lastNameTextController,
-              decoration: const InputDecoration(hintText: 'Nom', hintStyle: TextStyle(color: Colors.white)),
+              decoration: const InputDecoration(hintText: 'Surname', hintStyle: TextStyle(color: Colors.white)),
               style: const TextStyle(color: Colors.white),
               validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer du texte';
+                return 'Please enter some text';
               }
               return null;
             },
@@ -174,10 +217,10 @@ class _SignUpFormState extends State<RegisterForm> {
               style: const TextStyle(color: Colors.white),
               validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Veuillez entrer du texte';
+                return 'Please enter some text';
               }
               if (EmailValidator.validate(value) == false) {
-                return 'Veuillez entrer un email valide';
+                return 'Please enter a valid email';
               }
               
               return null;
@@ -192,7 +235,7 @@ class _SignUpFormState extends State<RegisterForm> {
               style: const TextStyle(color: Colors.white),
               obscureText: passwordVisible,
               decoration: InputDecoration(
-                hintText: 'Mot de passe',
+                hintText: 'Password',
                 hintStyle: const TextStyle(color: Colors.white),
                 suffixIcon: IconButton(
                      icon: Icon(passwordVisible
@@ -209,10 +252,10 @@ class _SignUpFormState extends State<RegisterForm> {
               ),
               validator: (value) {
               if (value == null || value.isEmpty || value.length < 6) {
-                return 'Veuillez entrer au minimum 6 caractères';
+                return 'Please enter 6 characters at minimum';
               }
               if (value != _passwordTextController.text) {
-                return 'Veuillez entrer des mots de passe identiques';
+                return 'Please enter same passwords';
               }
               return null;
             },
@@ -226,7 +269,7 @@ class _SignUpFormState extends State<RegisterForm> {
               style: const TextStyle(color: Colors.white),
               obscureText: passwordVisible,
               decoration: InputDecoration(
-                hintText: 'Confirmer mot de passe',
+                hintText: 'Confirm password',
                 hintStyle: const TextStyle(color: Colors.white),
                 suffixIcon: IconButton(
                      icon: Icon(passwordVisible
@@ -243,10 +286,10 @@ class _SignUpFormState extends State<RegisterForm> {
               ),
               validator: (value) {
               if (value == null || value.isEmpty || value.length < 6) {
-                return 'Veuillez entrer au minimum 6 caractères';
+                return 'Please enter 6 characters at minimum';
               }
               if (value != _passwordTextController.text) {
-                return 'Veuillez entrer des mots de passe identiques';
+                return 'Please enter same passwords';
               }
               return null;
             },
@@ -269,7 +312,7 @@ class _SignUpFormState extends State<RegisterForm> {
                 }),
               ),
               onPressed: signUp,
-              child: const Text('Inscription'),
+              child: const Text('Register'),
             ),
           ),
         ],

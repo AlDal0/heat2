@@ -3,39 +3,52 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 
-class Actualite extends StatelessWidget {
-  const Actualite({super.key});
+class ResaRestauration extends StatelessWidget {
+  const ResaRestauration({super.key});
+
+  List<Card> _buildGridCards(int count) {
+  List<Card> cards = List.generate(
+    count,
+    (int index) {
+      return Card(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AspectRatio(
+              aspectRatio: 18.0 / 11.0,
+              child: Image.asset('images/PXL_20230827_183250894.MP~2.jpg'),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Title'),
+                  //SizedBox(height: 8.0),
+                  //Text('Secondary Text'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  return cards;
+}
 
   @override
   Widget build(BuildContext context) {
-
-    final ScrollController scrollController = ScrollController();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Actualité'),
-        scrolledUnderElevation: 0),
-      body: Scrollbar(
-        thickness: 10.0,
-        controller: scrollController,
-        child: ListView(
-          shrinkWrap: true,
-          controller: scrollController,
-          //restorationId: 'list_demo_list_view',
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            for (int index = 1; index < 21; index++)
-              ListTile(
-                leading: const Text('01/01/2001'),
-                title: Text(
-                  "Article: $index",
-                ),
-                subtitle: const Text(
-                  "Résumé"),
-                
-              ),
-          ],
-        ),
+        title: const Text('Menus'),
+      ),
+     body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16.0),
+        childAspectRatio: 8.0 / 9.0,
+        //children: _buildGridCards(10),
       ),
       drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
@@ -61,58 +74,58 @@ class Actualite extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Accueil'),
+              title: const Text('Home'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/accueil');
+                      Navigator.pushNamed(context, '/home');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Mes Réservations'),
+              title: const Text('Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/mesreservations');
+                Navigator.pushNamed(context, '/reservations');
               },
             ),
             ListTile(
               leading: const Icon(Icons.newspaper),
-              title: const Text('Actualité'),
+              title: const Text('News'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/actualite');
+                      Navigator.pushNamed(context, '/news');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Chambres'),
+              title: const Text('Rooms'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resachambres');
+                Navigator.pushNamed(context, '/rooms');
                
                 //Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.local_restaurant),
-              title: const Text('Restauration'),
+              title: const Text('Menus'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/resarestauration');
+                Navigator.pushNamed(context, '/menus');
               },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Déconnexion'),
+              title: const Text('Log out'),
               onTap: () {
                 // Update the state of the app
                 // ...
@@ -123,7 +136,6 @@ class Actualite extends StatelessWidget {
           ],
         ),
       ),
-      
     );
   }
 }

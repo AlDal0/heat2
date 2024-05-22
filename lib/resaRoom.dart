@@ -12,9 +12,10 @@ import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 FirebaseFirestore db = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
-Map<DateTime, List<Event>> resaMapping= {DateTime(2021,1,1): [const Event('chambre')]};
-List<Event> chambreList = [];
-List<String> chambreSelectedList = [];
+Map<DateTime, List<Event>> resaMapping= {DateTime(2021,1,1): [const Event('room')]};
+
+List<Event> roomList = [];
+List<String> roomSelectedList = [];
 List<DateTime> resaDateList = [];
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 1, kToday.day);
@@ -54,12 +55,12 @@ var _kEventSource = {
 
 /// Example event class.
 class Event {
-  final String chambre;
+  final String room;
 
-  const Event(this.chambre);
+  const Event(this.room);
 
   @override
-  String toString() => chambre;
+  String toString() => room;
 }
 
 class ListItem<T> {
@@ -83,14 +84,14 @@ List<DateTime> daysInRange(DateTime first, DateTime last) {
   );
 }
 
-Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData) {
+Map<DateTime, List<Event>> getResa(reservationSnapshotData, roomSnapshotData) {
 
-      List<Event> resaMappingVar = [Event('chambre')];
+      List<Event> resaMappingVar = [Event('room')];
       List<DateTime> dateRange = [];
 
-      final Map<DateTime, List<Event>> dateChambre = {DateTime(2021,1,1): resaMappingVar};
+      final Map<DateTime, List<Event>> dateRoom = {DateTime(2021,1,1): resaMappingVar};
 
-      dateChambre.remove(DateTime(2021,1,1));
+      dateRoom.remove(DateTime(2021,1,1));
 
       for (var j = 0; j < resaDateList.length; j++) { 
 
@@ -99,7 +100,7 @@ Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData)
         for (final document in reservationSnapshotData.docs) {
         
           final data = document.data();
-          final chambre = data['chambre'].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(chambre/', (match) => '').replaceAllMapped(')', (match) => '');
+          final room = data['room'].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(room/', (match) => '').replaceAllMapped(')', (match) => '');
           DateTime tsdateStart = DateTime.utc(data['dateStart'].toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
           DateTime tsdateEnd = DateTime.utc(data['dateEnd'].toDate().year,data['dateEnd'].toDate().month,data['dateEnd'].toDate().day);
 
@@ -107,13 +108,13 @@ Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData)
 
           if (dateRange.contains(resaDateList[j])) {
 
-            for (final document1 in chambreSnapshotData.docs) {
+            for (final document1 in roomSnapshotData.docs) {
 
               final data1 = document1.data();
 
-              if (chambre.contains(document1.id)) {
+              if (room.contains(document1.id)) {
       
-                resaMappingVar.add(Event(data1['nom']));
+                resaMappingVar.add(Event(data1['name']));
 
               }
           
@@ -123,11 +124,11 @@ Map<DateTime, List<Event>> getResa(reservationSnapshotData, chambreSnapshotData)
 
       }
 
-      dateChambre[resaDateList[j]] = resaMappingVar;
+      dateRoom[resaDateList[j]] = resaMappingVar;
 
       }
 
-    return dateChambre;
+    return dateRoom;
     
   }
 
@@ -166,37 +167,79 @@ getoccurences(DateTime date) {
   
 }
 
-List<Event> getChambres(chambreSnapshotData) {
-  //final snapshot = await db.collection('chambre').get();
+List<Event> getRooms(roomSnapshotData) {
+  //final snapshot = await db.collection('room').get();
 
-  List<Event> getChambres = [];
+  //var twoDList = List<List>.generate(roomSnapshotData.docs.length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
 
-  for (final document in chambreSnapshotData.docs) {
+  //print(roomSnapshotData.docs.length);
+
+  List<Event> getRooms = [];
+
+  for (final document in roomSnapshotData.docs) {
     var data = document.data();
 
-    getChambres.add(Event(data['nom']));
+    getRooms.add(Event(data['name']));
   }
 
-  return getChambres;
+  return getRooms;
 
 }
 
-class ResaChambreHome extends StatelessWidget {
-  const ResaChambreHome({super.key});
+int getRoomPrice(roomSnapshotData, roomSelected) {
+
+  //print(roomSelected);
+
+  var roomSelectedPrice;
+
+  for (final document in roomSnapshotData.docs) {
+    var data = document.data();
+
+    if (data['name'] == roomSelected) {
+      roomSelectedPrice = data['price'];
+    }
+
+  }
+
+  return roomSelectedPrice;
+
+}
+
+String getRoomCurrency(roomSnapshotData, roomSelected) {
+
+  //print(roomSelected);
+
+  var roomSelectedCurrency;
+
+  for (final document in roomSnapshotData.docs) {
+    var data = document.data();
+
+    if (data['name'] == roomSelected) {
+      roomSelectedCurrency = data['currency'];
+    }
+
+  }
+
+  return roomSelectedCurrency;
+
+}
+
+class ResaRoomHome extends StatelessWidget {
+  const ResaRoomHome({super.key});
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Réservation Chambre'),
+          title: const Text('Room booking'),
           toolbarHeight: 30,
           scrolledUnderElevation: 0),
         body: SingleChildScrollView(
           controller: _mainController,
           child: SizedBox(
             height: MediaQuery.sizeOf(context).height,
-            child: const Center(child: ResaChambre())
+            child: const Center(child: ResaRoom())
           )
         ),
         drawer: Drawer(
@@ -223,58 +266,58 @@ class ResaChambreHome extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.home),
-              title: const Text('Accueil'),
+              title: const Text('Home'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/accueil');
+                      Navigator.pushNamed(context, '/home');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Mes Réservations'),
+              title: const Text('Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/mesreservations');
+                Navigator.pushNamed(context, '/reservations');
               },
             ),
             ListTile(
               leading: const Icon(Icons.newspaper),
-              title: const Text('Actualité'),
+              title: const Text('News'),
                     onTap: () {
 
-                      Navigator.pushNamed(context, '/actualite');
+                      Navigator.pushNamed(context, '/news');
                       
                     },
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Chambres'),
+              title: const Text('Rooms'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resachambres');
+                Navigator.pushNamed(context, '/rooms');
                
                 //Navigator.pop(context);
               },
             ),
             ListTile(
               leading: const Icon(Icons.local_restaurant),
-              title: const Text('Restauration'),
+              title: const Text('Menus'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/resarestauration');
+                Navigator.pushNamed(context, '/menus');
               },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Déconnexion'),
+              title: const Text('Log out'),
               onTap: () {
                 // Update the state of the app
                 // ...
@@ -289,21 +332,21 @@ class ResaChambreHome extends StatelessWidget {
   }
 }
 
-class ResaChambre extends StatefulWidget {
+class ResaRoom extends StatefulWidget {
 
-  const ResaChambre({Key? key}) : super(key: key);
+  const ResaRoom({Key? key}) : super(key: key);
   @override
-    _ResaChambreState createState() => _ResaChambreState();
+    _ResaRoomState createState() => _ResaRoomState();
 }
 
-class _ResaChambreState extends State<ResaChambre> {
+class _ResaRoomState extends State<ResaRoom> {
 
   final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').snapshots();
-  final Stream<QuerySnapshot> chambreStream = FirebaseFirestore.instance.collection('chambre').snapshots();
+  final Stream<QuerySnapshot> roomStream = FirebaseFirestore.instance.collection('room').snapshots();
 
   List<ListItem<String>> listDate = [];
-  List<ListItem<String>> listChambre = [];
-  late final ValueNotifier<List<Event>> _bookedChambres;
+  List<ListItem<String>> listRoom = [];
+  late final ValueNotifier<List<Event>> _bookedRooms;
   late final ValueNotifier<List<DateTime?>> _selectedDate;
   late bool isSelected;
   CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -324,7 +367,7 @@ class _ResaChambreState extends State<ResaChambre> {
     populateData();
 
     _selectedDay = _focusedDay;
-    _bookedChambres = ValueNotifier(_getEventsForDay(_selectedDay!));
+    _bookedRooms = ValueNotifier(_getEventsForDay(_selectedDay!));
     _selectedDate = ValueNotifier(_getDatesForDay(_selectedDay!,_selectedDay!));
 
    
@@ -333,14 +376,14 @@ class _ResaChambreState extends State<ResaChambre> {
 
   @override
   void dispose() {
-    _bookedChambres.dispose();
+    _bookedRooms.dispose();
     super.dispose();
   }
 
   void populateData() {
-  listChambre = [];
+  listRoom = [];
     for (int i = 0; i < 5; i++) {
-      listChambre.add(ListItem<String>("item $i"));
+      listRoom.add(ListItem<String>("item $i"));
     }
 
   listDate = [];
@@ -372,8 +415,8 @@ class _ResaChambreState extends State<ResaChambre> {
     if (!isSameDay(_selectedDay, selectedDay)) {
       
       setState(() {
-        chambreSelectedList = [];
-        for (var element in listChambre) { element.isSelected = false; buttonenabled = false; }
+        roomSelectedList = [];
+        for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
         _rangeStart = null; // Important to clean those
@@ -382,7 +425,7 @@ class _ResaChambreState extends State<ResaChambre> {
         
       });
 
-      _bookedChambres.value = _getEventsForDay(selectedDay);
+      _bookedRooms.value = _getEventsForDay(selectedDay);
       _selectedDate.value = _getDatesForDay(selectedDay,selectedDay);
 
     }
@@ -393,8 +436,8 @@ class _ResaChambreState extends State<ResaChambre> {
     if ((start != null && end != null) && (start.isAfter(end))) {
 
       setState(() {
-        chambreSelectedList = [];
-        for (var element in listChambre) { element.isSelected = false; buttonenabled = false; }
+        roomSelectedList = [];
+        for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
         _selectedDay = focusedDay;
         _focusedDay = focusedDay;
         _rangeStart = start;
@@ -409,26 +452,26 @@ class _ResaChambreState extends State<ResaChambre> {
 
         var sorted = a;
 
-        sorted.sort((a, b) => a.chambre.compareTo(b.chambre));
+        sorted.sort((a, b) => a.room.compareTo(b.room));
 
         var seen = Set<String>();
         List<Event> uniquelist = sorted.where((event) =>
-            seen.add(event.chambre)).toList();
+            seen.add(event.room)).toList();
 
-        _bookedChambres.value = uniquelist;
+        _bookedRooms.value = uniquelist;
         _selectedDate.value = _getDatesForDay(start, start);
       } else if (start != null) {
-        _bookedChambres.value = _getEventsForDay(start);
+        _bookedRooms.value = _getEventsForDay(start);
         _selectedDate.value = _getDatesForDay(start, start);
       } else if (end != null) {
-        _bookedChambres.value = _getEventsForDay(end);
+        _bookedRooms.value = _getEventsForDay(end);
         _selectedDate.value = _getDatesForDay(end, end);
       }
     }
     else {
       setState(() {
-        chambreSelectedList = [];
-        for (var element in listChambre) { element.isSelected = false; buttonenabled = false; }
+        roomSelectedList = [];
+        for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
         _selectedDay = focusedDay;
         _selectedDay = focusedDay;
         _focusedDay = focusedDay;
@@ -441,37 +484,37 @@ class _ResaChambreState extends State<ResaChambre> {
 
         var sorted = a;
 
-        sorted.sort((a, b) => a.chambre.compareTo(b.chambre));
+        sorted.sort((a, b) => a.room.compareTo(b.room));
 
         var seen = Set<String>();
         List<Event> uniquelist = sorted.where((event) =>
-            seen.add(event.chambre)).toList();
+            seen.add(event.room)).toList();
 
-        _bookedChambres.value = uniquelist;
+        _bookedRooms.value = uniquelist;
         _selectedDate.value = _getDatesForDay(start, end);
       } else if (start != null) {
-        _bookedChambres.value = _getEventsForDay(start);
+        _bookedRooms.value = _getEventsForDay(start);
         _selectedDate.value = _getDatesForDay(start, start);
       } else if (end != null) {
-        _bookedChambres.value = _getEventsForDay(end);
+        _bookedRooms.value = _getEventsForDay(end);
         _selectedDate.value = _getDatesForDay(end, end);
       }
     }
 
   }
 
-  void updateColorAfterSelection(int index, String chambreSelected) {
+  void updateColorAfterSelection(int index, String roomSelected) {
 
-    if (listChambre[index].isSelected == true) {
+    if (listRoom[index].isSelected == true) {
       ScaffoldMessenger.of(context)
                           ..removeCurrentSnackBar()
-                          ..showSnackBar(SnackBar(content: Text('$chambreSelected déjà sélectionnée'), duration: const Duration(milliseconds: 1000)));
+                          ..showSnackBar(SnackBar(content: Text('$roomSelected already selected'), duration: const Duration(milliseconds: 1000)));
     }
     else {
     setState(() {
 
-      listChambre[index].isSelected = true;
-      chambreSelectedList.add(chambreSelected);
+      listRoom[index].isSelected = true;
+      roomSelectedList.add(roomSelected);
       buttonenabled = true;
     });
     }
@@ -484,7 +527,7 @@ class _ResaChambreState extends State<ResaChambre> {
       firstDate: DateTime(2024),
       lastDate: DateTime(2030),
       dateFormat: "dd-MMMM-yyyy",
-      locale: DateTimePickerLocale.fr,
+      locale: DateTimePickerLocale.en_us,
       looping: true,
     );
 
@@ -493,7 +536,7 @@ class _ResaChambreState extends State<ResaChambre> {
 
   Widget _getListDateContainer(BuildContext context, int index, List<DateTime?> dateSelected) {
 
-    var a =['Début : ','Fin : '];
+    var a =['Start : ','End : '];
 
     return InkWell(
         onTap: () async {
@@ -554,30 +597,40 @@ class _ResaChambreState extends State<ResaChambre> {
     );
   }
 
-  Widget _getListItemTile(BuildContext context, int index, String chambreSelected, chambreSnapshot, snapshotImage, ScrollController scrollController) {
+  Widget _getListItemTile(BuildContext context, int index, String roomSelected, roomSnapshot, snapshotImage, ScrollController scrollController) {
 
     var key = GlobalKey();
 
-    
+    //print(getRooms(roomSnapshot.requireData));
+
+    //var twoDList = List<List>.generate(getRooms(roomSnapshot.requireData).length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
+
+    var roomPrice = getRoomPrice(roomSnapshot.requireData, roomSelected);
+
+    var roomCurrency = getRoomCurrency(roomSnapshot.requireData, roomSelected);
+
+  //twoDList[0][1] = "deneme";
+
+  //print(twoDList);
 
     return InkWell(
       onTap: () {
 
         Scrollable.ensureVisible(key.currentContext!, alignment: 0.5, duration: const Duration(seconds: 1));
 
-        if (listChambre[index].isSelected == true) {
+        if (listRoom[index].isSelected == true) {
 
           // ScaffoldMessenger.of(context)
           //   ..removeCurrentSnackBar()
-          //   ..showSnackBar(SnackBar(content: Text('$chambreSelected retirée'), duration: const Duration(milliseconds: 1000)));
+          //   ..showSnackBar(SnackBar(content: Text('$roomSelected retirée'), duration: const Duration(milliseconds: 1000)));
           
 
         setState(() {
 
-          listChambre[index].isSelected = !listChambre[index].isSelected;
-          chambreSelectedList.remove(chambreSelected);
+          listRoom[index].isSelected = !listRoom[index].isSelected;
+          roomSelectedList.remove(roomSelected);
         
-          var result = listChambre.any((element) => element.isSelected);
+          var result = listRoom.any((element) => element.isSelected);
           if (result == false) {
             buttonenabled = false;
           }
@@ -589,16 +642,16 @@ class _ResaChambreState extends State<ResaChambre> {
           // ScaffoldMessenger.of(context)
           //   ..removeCurrentSnackBar()
           //   ..showSnackBar(SnackBar(
-          //     content: Text('$chambreSelected sélectionnée'),             
+          //     content: Text('$roomSelected sélectionnée'),             
           //     duration: const Duration(milliseconds: 1000)
           // ));
           
 
           setState(() {
 
-            listChambre[index].isSelected = true;
+            listRoom[index].isSelected = true;
 
-            chambreSelectedList.add(chambreSelected);
+            roomSelectedList.add(roomSelected);
 
             buttonenabled = true;
 
@@ -636,8 +689,8 @@ class _ResaChambreState extends State<ResaChambre> {
             ),
           border: Border.all(),
           borderRadius: BorderRadius.circular(12.0),
-          color: listChambre[index].isSelected ? Colors.red[100] : const Color.fromARGB(255, 221, 248, 249),
-          //color: listChambre[index].isSelected ? Colors.red[100] : const Color.fromARGB(255, 236, 249, 221),
+          color: listRoom[index].isSelected ? Colors.red[100] : const Color.fromARGB(255, 221, 248, 249),
+          //color: listRoom[index].isSelected ? Colors.red[100] : const Color.fromARGB(255, 236, 249, 221),
         //  color: isSelected ? Colors.blue : null,
         ),
         child:
@@ -648,8 +701,8 @@ class _ResaChambreState extends State<ResaChambre> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(chambreSelected,style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                DetailsButton(index, chambreSelected, updateColorAfterSelection, chambreSnapshot),
+                Text("$roomSelected : $roomPrice$roomCurrency / night", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                DetailsButton(index, roomSelected, updateColorAfterSelection, roomSnapshot),
             ]),
             
           ),
@@ -660,11 +713,11 @@ class _ResaChambreState extends State<ResaChambre> {
       );
 }
 
-addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedListToBook, void onRangeSelectedFunction(DateTime? start, DateTime? end, DateTime focusedDay)) async {
+addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToBook, void onRangeSelectedFunction(DateTime? start, DateTime? end, DateTime focusedDay)) async {
     CollectionReference reservation = FirebaseFirestore.instance.collection('reservation');
-    final snapshot1 = await db.collection('chambre').get();
+    final snapshot1 = await db.collection('room').get();
     final snapshot2 = await db.collection('client').get();
-    List<DocumentReference> chambreId = [];
+    List<DocumentReference> roomId = [];
     List<DateTime> dateRange = [];
     late DocumentReference clientId;
 
@@ -693,9 +746,9 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
 
       final data1 = document1.data();
 
-      if (chambreSelectedListToBook.contains(data1['nom'])) {
+      if (roomSelectedListToBook.contains(data1['name'])) {
 
-        chambreId.add(db.doc('/chambre/${document1.id}'));
+        roomId.add(db.doc('/room/${document1.id}'));
 
       }
 
@@ -708,16 +761,16 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
       if (FirebaseAuth.instance.currentUser!.email!.contains(data2['email'])) {
 
         clientId = db.doc('/client/${document2.id}');
-        clientNameEmail = data2['nom'];
-        clientSurnameEmail = data2['prénom'];
+        clientNameEmail = data2['surname'];
+        clientSurnameEmail = data2['firstName'];
 
       }
 
     }
 
     var mappingAdded = {
-      for (var item in List.generate(dateRange.length, (index) => index)) dateRange[item] : List.generate(chambreSelectedListToBook.length,(i) {
-          return Event(chambreSelectedListToBook[i]);
+      for (var item in List.generate(dateRange.length, (index) => index)) dateRange[item] : List.generate(roomSelectedListToBook.length,(i) {
+          return Event(roomSelectedListToBook[i]);
         })
           ..addAll({})
     };
@@ -734,8 +787,8 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
 
       }
       else {
-        var listEvent = List.generate(chambreSelectedListToBook.length,(i) {
-          return Event(chambreSelectedListToBook[i]);
+        var listEvent = List.generate(roomSelectedListToBook.length,(i) {
+          return Event(roomSelectedListToBook[i]);
         });
           kEvents[dateRange[j]] = listEvent;
 
@@ -745,35 +798,37 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
 
     //DateTime.utc(dateStart.toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
 
-    final dateStartEmail = DateFormat.yMMMMd('fr_FR').format(dateStart);
-    final dateEndEmail = DateFormat.yMMMMd('fr_FR').format(dateEnd!);
+    final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
+    final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
 
 
     await reservation.add({
       'dateStart': dateStart,
       'dateEnd': dateEnd,
-      'chambre': chambreId,
+      'room': roomId,
       'client': clientId,
       'status': 'created',
       'publisher': 'client',
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
-        'subject': 'Réservation chez Heat du $dateStartEmail au $dateEndEmail confirmée',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Merci $clientSurnameEmail $clientNameEmail votre réservation !</h1> <br> Date début : $dateStartEmail <br></br> Date fin : $dateEndEmail <br></br> Chambres : ${chambreSelectedListToBook.join(', ')}</body></code>',
+        'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1> <br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
       }
     });
     
     onRangeSelectedFunction(dateStart, dateEnd, dateStart);
 
+
+
   }
 
-  Future<String> getChambreMiniImage(String chambreSelectedToGetImage, chambreSnapshotData) async {
+  Future<String> getRoomMiniImage(String roomSelectedToGetImage, roomSnapshotData) async {
 
   imgMini = '';
 
-  for (final document in chambreSnapshotData.docs) {
+  for (final document in roomSnapshotData.docs) {
     var data = document.data();
-      if (data['nom'].toString() == chambreSelectedToGetImage) {
+      if (data['name'].toString() == roomSelectedToGetImage) {
 
         try {
 
@@ -805,21 +860,21 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
           return const Center(child: CircularProgressIndicator());
         }
       return StreamBuilder<QuerySnapshot>(
-      stream: chambreStream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> chambreSnapshot) {
+      stream: roomStream,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> roomSnapshot) {
 
         print(pixelRatio);
 
-        if (chambreSnapshot.hasError) {
+        if (roomSnapshot.hasError) {
           return const Text('Something went wrong');
         }
-        if (!chambreSnapshot.hasData) {
+        if (!roomSnapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         resaDateList = getResaDate(reservationSnapshot.requireData);
-        resaMapping = getResa(reservationSnapshot.requireData, chambreSnapshot.requireData);
-        chambreList = getChambres(chambreSnapshot.requireData);
+        resaMapping = getResa(reservationSnapshot.requireData, roomSnapshot.requireData);
+        roomList = getRooms(roomSnapshot.requireData);
 
         _kEventSource = Map.fromIterable(List.generate(resaDateList.length, (index) => index),
              key: (item) => resaDateList[item],
@@ -845,7 +900,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                 //height: 340,
                 child:
                 TableCalendar<Event>(
-                  locale: 'fr_FR',           
+                  locale: 'en_EN',           
                   firstDay: kFirstDay,
                   lastDay: kLastDay,
                   focusedDay: _focusedDay,
@@ -886,7 +941,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                   },
                   calendarBuilders: CalendarBuilders(
                     defaultBuilder: (BuildContext context, DateTime day, DateTime focusedDay) {
-                      if (chambreList.length - _getEventsForDay(day).length == 0) {
+                      if (roomList.length - _getEventsForDay(day).length == 0) {
                         return Center(
                           child: Text(
                             '${day.day}',
@@ -896,7 +951,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                       }
                     },
                     markerBuilder: (BuildContext context, date, events) {
-                    if (chambreList.length - events.length == 0) {
+                    if (roomList.length - events.length == 0) {
                       return Container(
 
                       );
@@ -911,7 +966,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                         color: Colors.green,
                       ),
                       child: Text(
-                        '${chambreList.length - events.length}',
+                        '${roomList.length - events.length}',
                         style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     );
@@ -971,7 +1026,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Chambres disponibles : ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text('Available rooms : ', style: TextStyle(fontWeight: FontWeight.bold)),
                     Container(
                       width: 22,
                       height: 22,
@@ -981,11 +1036,11 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                         color: Colors.green,
                       ),
                       child: Text(
-                        '${chambreList.length - _bookedChambres.value.length}',
+                        '${roomList.length - _bookedRooms.value.length}',
                         style: const TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
-                    //Text('${chambreList.length - _bookedChambres.value.length}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))
+                    //Text('${roomList.length - _bookedRooms.value.length}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))
                 ],)
             )
           ),
@@ -997,7 +1052,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
             Container(
               padding: const EdgeInsets.only(top: 15.0),
               child:
-              const Text('Cliquer pour sélectionner', style: TextStyle(fontStyle: FontStyle.italic))
+              const Text('Click to select', style: TextStyle(fontStyle: FontStyle.italic))
           )
           ),
           
@@ -1008,25 +1063,25 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
             flex: 6,
             child:
               ValueListenableBuilder<List<Event>>(
-                  valueListenable: _bookedChambres,
+                  valueListenable: _bookedRooms,
                   builder: (context, value, _) {
-                    //print(_bookedChambres);
+                    //print(_bookedRooms);
               
                     final List<Event> result = [];
                       
-                    for (var j = 0; j < chambreList.length; j++) {
+                    for (var j = 0; j < roomList.length; j++) {
               
-                      if (value.toString().contains(chambreList[j].toString())) {
+                      if (value.toString().contains(roomList[j].toString())) {
               
                       }
                       else {
-                        result.add(chambreList[j]);
+                        result.add(roomList[j]);
                         
                       }
                     };
               
                     for (int i = 0; i < result.length; i++) {
-                      listChambre.add(ListItem<String>("item $i"));
+                      listRoom.add(ListItem<String>("item $i"));
                     }
               
                     final ScrollController scrollControllerList = ScrollController();
@@ -1034,7 +1089,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                     if (result.isEmpty) {
                       return const Center(
                         child: Text(
-                          'Aucune chambre disponible sur la période donnée',
+                          'No available room in the selected period',
                           style: TextStyle(color: Colors.red, fontSize: 15))
                           //margin: EdgeInsets.symmetric(vertical: 4)
                       );
@@ -1051,13 +1106,13 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                         controller: scrollControllerList,
                         itemBuilder: (context, index) {
                           return FutureBuilder<String>(
-                            future: getChambreMiniImage(result[index].toString(), chambreSnapshot.requireData),
+                            future: getRoomMiniImage(result[index].toString(), roomSnapshot.requireData),
                             builder: (context, AsyncSnapshot<String> snapshot){
                               if (snapshot.hasData) {
-                          //getChambreMiniImage(result[index].toString(), chambreSnapshot.requireData);
+                          //getRoomMiniImage(result[index].toString(), roomSnapshot.requireData);
                           //print(result[index]);
-                          //getChambreImages(result[index].toString(), chambreSnapshot.requireData);
-                                return _getListItemTile(context, index, result[index].toString(), chambreSnapshot, snapshot.data, scrollControllerList);
+                          //getRoomImages(result[index].toString(), roomSnapshot.requireData);
+                                return _getListItemTile(context, index, result[index].toString(), roomSnapshot, snapshot.data, scrollControllerList);
                               }
                               else {
                                 return const CircularProgressIndicator();
@@ -1081,7 +1136,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Chambres sélectionnées : '),
+                  const Text('Selected rooms : '),
                   Container(
                       width: 22,
                       height: 22,
@@ -1091,11 +1146,11 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                         color: Colors.red,
                       ),
                       child: Text(
-                        '${chambreSelectedList.length}',
+                        '${roomSelectedList.length}',
                         style: const TextStyle(color: Colors.white, fontSize: 15),
                       ),
                     ),
-                  //Text('${chambreSelectedList.length}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, backgroundColor: Color.fromARGB(255, 240, 199, 196))),
+                  //Text('${roomSelectedList.length}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, backgroundColor: Color.fromARGB(255, 240, 199, 196))),
               ])
           )
           ),
@@ -1120,31 +1175,31 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
                       
                     onPressed:buttonenabled?(){ //if buttonenabled == true then pass a function otherwise pass "null"
                         if(_rangeStart == null && _rangeEnd == null) {
-                          addResa(_selectedDay, _selectedDay, chambreSelectedList, _onRangeSelected);
+                          addResa(_selectedDay, _selectedDay, roomSelectedList, _onRangeSelected);
                         }
                         else if (_rangeEnd == null) {
                           _rangeEnd = _rangeStart;
-                          addResa(_rangeStart, _rangeEnd, chambreSelectedList, _onRangeSelected);
+                          addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
                         }
                         else {
-                          addResa(_rangeStart, _rangeEnd, chambreSelectedList, _onRangeSelected);
+                          addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
                         }
                         ScaffoldMessenger.of(context)
                           ..removeCurrentSnackBar()
-                          ..showSnackBar(const SnackBar(content: Text('Réservation enregistrée'),duration: Duration(milliseconds: 1000)));
+                          ..showSnackBar(const SnackBar(content: Text('Reservation confirmed'),duration: Duration(milliseconds: 1000)));
                         
 
-                        chambreSelectedList = [];
+                        roomSelectedList = [];
 
-                        //listChambre[0].isSelected == true;
+                        //listRoom[0].isSelected == true;
                         setState(() {
-                          for (var j = 0; j < listChambre.length; j++) {
-                            listChambre[j].isSelected = false;
+                          for (var j = 0; j < listRoom.length; j++) {
+                            listRoom[j].isSelected = false;
                           }
                         });
 
                     }:null,
-                    child: const Text('Réserver'),
+                    child: const Text('Book'),
                   )
               )
             )
@@ -1160,12 +1215,12 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> chambreSelectedList
 
 class DetailsButton extends StatefulWidget {
 
-  final String chambreSelected;
+  final String roomSelected;
   //final List<ListItem<String>> list;
   final dynamic updateContainerColor;
   final int index;
-  final dynamic chambreSnapshot;
-  const DetailsButton(this.index, this.chambreSelected, this.updateContainerColor, this.chambreSnapshot, {super.key});
+  final dynamic roomSnapshot;
+  const DetailsButton(this.index, this.roomSelected, this.updateContainerColor, this.roomSnapshot, {super.key});
 
   @override
   State<DetailsButton> createState() => _DetailsButtonState();
@@ -1173,13 +1228,13 @@ class DetailsButton extends StatefulWidget {
 
 class _DetailsButtonState extends State<DetailsButton> {
 
-  getChambreImages(String chambreSelectedToGetImage, chambreSnapshotData) async {
+  getRoomImages(String roomSelectedToGetImage, roomSnapshotData) async {
 
   imgList = [];
 
-  for (final document in chambreSnapshotData.docs) {
+  for (final document in roomSnapshotData.docs) {
     var data = document.data();
-      if (data['nom'].toString() == chambreSelectedToGetImage) {
+      if (data['name'].toString() == roomSelectedToGetImage) {
         
 
         try {
@@ -1209,12 +1264,12 @@ class _DetailsButtonState extends State<DetailsButton> {
     
     return ElevatedButton(
       onPressed: () async {
-        await getChambreImages(widget.chambreSelected, widget.chambreSnapshot.requireData);
-        //globals.widgetlist = getListWidget(widget.chambre_selected);
+        await getRoomImages(widget.roomSelected, widget.roomSnapshot.requireData);
+        //globals.widgetlist = getListWidget(widget.room_selected);
 
         _navigateAndDisplaySelection();
       },
-      child: const Text('Détails'),
+      child: const Text('Details'),
     );
   }
 
@@ -1225,7 +1280,7 @@ class _DetailsButtonState extends State<DetailsButton> {
     // Navigator.pop on the Selection Screen.
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(widget.chambreSelected)),
+      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(widget.roomSelected)),
     );
 
     // When a BuildContext is used from a StatefulWidget, the mounted property
@@ -1242,7 +1297,7 @@ class _DetailsButtonState extends State<DetailsButton> {
       ..showSnackBar(SnackBar(content: Text('$result'),duration: const Duration(milliseconds: 1000)));
       
     
-    widget.updateContainerColor(widget.index, widget.chambreSelected);
+    widget.updateContainerColor(widget.index, widget.roomSelected);
     }
       
   }
@@ -1250,8 +1305,8 @@ class _DetailsButtonState extends State<DetailsButton> {
 
 class CarouselWithIndicatorDemo extends StatefulWidget {
 
-  final String chambreSelected;
-  const CarouselWithIndicatorDemo(this.chambreSelected, {super.key});
+  final String roomSelected;
+  const CarouselWithIndicatorDemo(this.roomSelected, {super.key});
 
 
   @override
@@ -1277,7 +1332,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
         children: [
         //Expanded(
           CarouselSlider(
-            items: getListWidget(widget.chambreSelected),
+            items: getListWidget(widget.roomSelected),
             carouselController: _controller,
             options: CarouselOptions(
                 autoPlay: false,
@@ -1313,9 +1368,9 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
         ElevatedButton(
                 onPressed: () {
                   // Close the screen and return "Yep!" as the result.
-                  Navigator.pop(context, '${widget.chambreSelected} sélectionnée');
+                  Navigator.pop(context, '${widget.roomSelected} selected');
                 },
-                child: const Text('Sélectionner'),
+                child: const Text('Select'),
               ),
       ]),
     )
@@ -1323,7 +1378,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   }
 }
 
-List<Widget> getListWidget(String chambreSelected) {
+List<Widget> getListWidget(String roomSelected) {
 
 List<Widget> imageSliders = imgList
     .map((item) => Container(
@@ -1351,7 +1406,7 @@ List<Widget> imageSliders = imgList
                   padding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 20.0),
                   child: Text(
-                    chambreSelected,
+                    roomSelected,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
