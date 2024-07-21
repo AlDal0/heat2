@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'home.dart';
-import 'login_screen.dart';
+import 'loginScreen.dart';
 import 'news.dart';
 import 'resaRoom.dart';
 import 'resaMenu.dart';

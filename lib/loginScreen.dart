@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:heat/home.dart';
-import 'register_screen.dart';
+import 'registerScreen.dart';
 import 'package:flutter/material.dart';
 
 FirebaseAuth auth = FirebaseAuth.instance;

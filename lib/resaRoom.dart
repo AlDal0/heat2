@@ -812,7 +812,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1> <br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br> Amount : $dateStartEmail <br><br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
       }
     });
     

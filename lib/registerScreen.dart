@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:path/path.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:heat/login_screen.dart';
+import 'package:heat/loginScreen.dart';
 //import 'firebase_options.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
