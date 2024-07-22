@@ -720,6 +720,9 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     List<DocumentReference> roomId = [];
     List<DateTime> dateRange = [];
     late DocumentReference clientId;
+    num resaAmount = 0;
+    late String resaCurrency;
+     
 
     //if (dateStart != null && dateEnd != null) {
 
@@ -746,9 +749,13 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
 
       final data1 = document1.data();
 
+      resaCurrency = data1['currency'];
+
       if (roomSelectedListToBook.contains(data1['name'])) {
 
         roomId.add(db.doc('/room/${document1.id}'));
+
+        resaAmount = resaAmount + data1['price'];
 
       }
 
@@ -807,12 +814,14 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
       'dateEnd': dateEnd,
       'room': roomId,
       'client': clientId,
+      'amount': resaAmount,
+      'currency': resaCurrency,
       'status': 'created',
       'publisher': 'client',
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br> Amount : $dateStartEmail <br><br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br> Amount : $resaAmount $resaCurrency <br><br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
       }
     });
     
