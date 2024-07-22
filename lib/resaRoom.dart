@@ -275,7 +275,7 @@ class ResaRoomHome extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Reservations'),
+              title: const Text('My Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
@@ -294,13 +294,13 @@ class ResaRoomHome extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Rooms'),
+              title: const Text('Room booking'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/rooms');
+                Navigator.pushNamed(context, '/resaRoom');
                
                 //Navigator.pop(context);
               },

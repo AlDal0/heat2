@@ -35,7 +35,7 @@ void main() async {
                 '/login': (context) => const LoginScreen(),
                 '/home': (context) => const Accueil(),
                 '/news': (context) => const Actualite(),
-                '/rooms': (context) => const ResaRoomHome(),
+                '/resaRoom': (context) => const ResaRoomHome(),
                 '/menus': (context) => const ResaRestauration(),
                 '/reservations': (context) => const MesReservationsHome(),
               },

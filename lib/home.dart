@@ -42,7 +42,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const ResaRoomHome()),
                 );
               },
-              child: const Text('Rooms'),
+              child: const Text('Room booking'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -68,7 +68,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const MesReservationsHome()),
                 );
               },
-              child: const Text('Reservations'),
+              child: const Text('My Reservations'),
             ),
           ]
         ),
@@ -106,7 +106,7 @@ class Accueil extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.account_box),
-              title: const Text('Reservations'),
+              title: const Text('My Reservations'),
               onTap: () {
                 // Update the state of the app
                 // ...
@@ -125,13 +125,13 @@ class Accueil extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Rooms'),
+              title: const Text('Room booking'),
               onTap: () {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/rooms');
+                Navigator.pushNamed(context, '/resaRoom');
                
                 //Navigator.pop(context);
               },
