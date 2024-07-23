@@ -720,8 +720,8 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     List<DocumentReference> roomId = [];
     List<DateTime> dateRange = [];
     late DocumentReference clientId;
-    num resaAmount = 0;
-    late String resaCurrency;
+    num resaAmountDay = 0;
+    String resaCurrency = "";
      
 
     //if (dateStart != null && dateEnd != null) {
@@ -748,14 +748,15 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     for (final document1 in snapshot1.docs) {
 
       final data1 = document1.data();
-
-      resaCurrency = data1['currency'];
+      if (resaCurrency == "") {
+        resaCurrency = data1['currency'];
+      }
 
       if (roomSelectedListToBook.contains(data1['name'])) {
 
         roomId.add(db.doc('/room/${document1.id}'));
 
-        resaAmount = resaAmount + data1['price'];
+        resaAmountDay = resaAmountDay + data1['price'];
 
       }
 
@@ -807,6 +808,9 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
 
     final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
     final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
+    final stayLength = dateRange.length-1;
+
+    final resaAmountTotal = resaAmountDay * stayLength;
 
 
     await reservation.add({
@@ -814,14 +818,14 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
       'dateEnd': dateEnd,
       'room': roomId,
       'client': clientId,
-      'amount': resaAmount,
+      'amount': resaAmountTotal,
       'currency': resaCurrency,
       'status': 'created',
       'publisher': 'client',
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br> Amount : $resaAmount $resaCurrency <br><br> Start date : $dateStartEmail <br></br> End date : $dateEndEmail <br></br> Rooms : ${roomSelectedListToBook.join(', ')}</body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $stayLength nights <br></br> Rooms : ${roomSelectedListToBook.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
       }
     });
     
@@ -892,7 +896,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
                })
            ..addAll({}));
 
-         kEvents = LinkedHashMap<DateTime, List<Event>>(
+        kEvents = LinkedHashMap<DateTime, List<Event>>(
            equals: isSameDay,
           hashCode: getHashCode,
         )..addAll(_kEventSource);
