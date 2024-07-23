@@ -13,44 +13,6 @@ import 'dart:convert';
 FirebaseAuth auth = FirebaseAuth.instance;
 FirebaseFirestore db = FirebaseFirestore.instance;
 
-Future<void> createLagoCustomer(String uid, String firstName, String surname, String email) async {
-
-  var data = {
-   "customer": {
-      "external_id": uid,
-      "currency": "EUR",
-      "email": email,
-      "name": "$firstName $surname"
-   }
-  };
-
-  final String jsonString = jsonEncode(data);
-
-  //final response = await http.get(
-  //  Uri.parse('http://localhost:3000/api/v1/customers/cus01'));
-
-  final response = await http.post(
-    Uri.parse("http://localhost:3000/api/v1/customers"),
-    headers: <String, String>{
-      "Content-Type": "application/json",
-      "Authorization": "Bearer ff446403-d8d3-44bf-b1cc-88a1c31722f7"
-    },
-    body: jsonString,
-  );
-
-  if (response.statusCode == 200) {
-    // If the server did return a 201 CREATED response,
-    // then parse the JSON.
-    print(response.body);
-    return jsonDecode(response.body);
-  } else {
-    // If the server did not return a 201 CREATED response,
-    // then throw an exception.
-    print(jsonDecode(response.body));
-    throw Exception('Failed to create user.');
-  }
-}
-
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
   
@@ -123,8 +85,6 @@ class _SignUpFormState extends State<RegisterForm> {
               .then((value) async {
 
                 client = value.user;
-
-                await createLagoCustomer(client.uid, _firstNameTextController.text, _lastNameTextController.text, _emailTextController.text);
 
                 db
                   .collection("client")
