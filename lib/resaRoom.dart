@@ -190,7 +190,7 @@ int getRoomPrice(roomSnapshotData, roomSelected) {
 
   //print(roomSelected);
 
-  var roomSelectedPrice;
+  int roomSelectedPrice = 0;
 
   for (final document in roomSnapshotData.docs) {
     var data = document.data();
@@ -209,7 +209,7 @@ String getRoomCurrency(roomSnapshotData, roomSelected) {
 
   //print(roomSelected);
 
-  var roomSelectedCurrency;
+  String roomSelectedCurrency = "";
 
   for (final document in roomSnapshotData.docs) {
     var data = document.data();
@@ -701,7 +701,7 @@ class _ResaRoomState extends State<ResaRoom> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("$roomSelected : $roomPrice$roomCurrency / night", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+                Text("$roomSelected : $roomPrice $roomCurrency / night", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
                 DetailsButton(index, roomSelected, updateColorAfterSelection, roomSnapshot),
             ]),
             
@@ -719,9 +719,11 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     final snapshot2 = await db.collection('client').get();
     List<DocumentReference> roomId = [];
     List<DateTime> dateRange = [];
+    List<String> roomSelectedListToBookAndPrice = [];
     late DocumentReference clientId;
     num resaAmountDay = 0;
     String resaCurrency = "";
+    int roomPrice = 0;
      
 
     //if (dateStart != null && dateEnd != null) {
@@ -757,6 +759,10 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
         roomId.add(db.doc('/room/${document1.id}'));
 
         resaAmountDay = resaAmountDay + data1['price'];
+
+        roomPrice = getRoomPrice(snapshot1, data1['name']);
+        
+        roomSelectedListToBookAndPrice.add(data1['name']+ ' ($roomPrice $resaCurrency / night)');
 
       }
 
@@ -812,6 +818,9 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
 
     final resaAmountTotal = resaAmountDay * stayLength;
 
+    //print(roomSelectedListToBook);
+
+   
 
     await reservation.add({
       'dateStart': dateStart,
@@ -825,13 +834,11 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $stayLength nights <br></br> Rooms : ${roomSelectedListToBook.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $stayLength nights <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
       }
     });
     
     onRangeSelectedFunction(dateStart, dateEnd, dateStart);
-
-
 
   }
 
