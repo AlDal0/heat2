@@ -723,7 +723,6 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     late DocumentReference clientId;
     num resaAmountDay = 0;
     String resaCurrency = "";
-    int roomPrice = 0;
      
 
     //if (dateStart != null && dateEnd != null) {
@@ -759,10 +758,8 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
         roomId.add(db.doc('/room/${document1.id}'));
 
         resaAmountDay = resaAmountDay + data1['price'];
-
-        roomPrice = getRoomPrice(snapshot1, data1['name']);
         
-        roomSelectedListToBookAndPrice.add(data1['name']+ ' ($roomPrice $resaCurrency / night)');
+        roomSelectedListToBookAndPrice.add(data1['name']+ ' (' + data1['price'].toString() + ' $resaCurrency / night)');
 
       }
 
