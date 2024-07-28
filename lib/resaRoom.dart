@@ -815,16 +815,13 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
 
     final resaAmountTotal = resaAmountDay * stayLength;
 
-    //print(roomSelectedListToBook);
-
-   
-
     await reservation.add({
       'dateStart': dateStart,
       'dateEnd': dateEnd,
+      'stayLength': stayLength,
       'room': roomId,
       'client': clientId,
-      'amount': resaAmountTotal,
+      'totalAmount': resaAmountTotal,
       'currency': resaCurrency,
       'status': 'created',
       'publisher': 'client',
