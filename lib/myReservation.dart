@@ -230,8 +230,6 @@ class ResaContent extends StatelessWidget {
   for (final document in roomSnapshotData.docs) {
     var data = document.data();
 
-   
-
       if (data['name'].toString() == roomSelectedToGetImage) {
 
         try {
@@ -277,7 +275,7 @@ class ResaContent extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 370,
+                    height: 330,
                     child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(

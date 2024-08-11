@@ -52,7 +52,7 @@ class Accueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ResaRestauration()),
+                  MaterialPageRoute(builder: (context) => const ResaMenuHome()),
                 );
               },
               child: const Text('Menus'),
