@@ -260,8 +260,8 @@ class ResaContent extends StatelessWidget {
     // );
     final descriptionStyle = theme.textTheme.titleMedium!;
 
-    final tsdateStart = DateFormat.yMMMMd('fr_FR').format(reservationData.docs[index].data()['dateStart'].toDate());
-    final tsdateEnd = DateFormat.yMMMMd('fr_FR').format(reservationData.docs[index].data()['dateEnd'].toDate());
+    final tsdateStart = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].data()['dateStart'].toDate());
+    final tsdateEnd = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].data()['dateEnd'].toDate());
 
     return FutureBuilder<String>(
       future: getRoomImages(tempList[0].toString(), roomData),

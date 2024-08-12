@@ -8,7 +8,8 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
 
-String imgList = '';
+String imgMenuMini = '';
+List<String> imgMenu = [];
 
 class ResaMenuHome extends StatelessWidget {
   const ResaMenuHome({super.key});
@@ -154,8 +155,7 @@ class _MenusState extends State<Menus> {
                   //restorationId: 'list_demo_list_view',
                   //padding: const EdgeInsets.symmetric(vertical: 8),
                   itemBuilder: (context, index) {
-                    //print(index);
-                    //print(menuData.docs[index].get('name'));
+       
                     return MenuContent(context: context, index: index, menuData: menuData);
                   }
                 )
@@ -173,121 +173,152 @@ class MenuContent extends StatelessWidget {
 
   final BuildContext context;
   final int index;
-  final dynamic menuData;
+  final QuerySnapshot<Object?> menuData;
 
-  Future<String> getMenuImages(int index, menuSnapshotData) async {
+  Future<String> getMenuImagesMini(int index, menuData) async {
 
-  imgList = '';
+    imgMenuMini = '';
 
-  //for (final document in menuSnapshotData.docs) {
-    //var data = document.data();
+          try {
 
-        try {
+            final image1Url = await storageRef.child(menuData.docs[index].get('image1')).getDownloadURL();
+            
+            imgMenuMini = image1Url;
 
-          final image1Url = await storageRef.child(menuSnapshotData.docs[index].get('image1')).getDownloadURL();
-          // final image2Url = await storageRef.child(data['image2']).getDownloadURL();
-          // final image3Url = await storageRef.child(data['image3']).getDownloadURL();
+          } on FirebaseException catch (e) {
+          // Handle any errors.
+          } 
 
-          imgList = image1Url;
-          // imgList.add(image2Url);
-          // imgList.add(image3Url);
+      return imgMenuMini;
+  }
 
-        } on FirebaseException catch (e) {
-        // Handle any errors.
-        } 
+  Future<List<String>> getMenuImages(int index, menuData) async {
 
-    //}
-    return imgList;
+    imgMenu = [];
+
+          try {
+
+            final image1Url = await storageRef.child(menuData.docs[index].get('image1')).getDownloadURL();
+            final image2Url = await storageRef.child(menuData.docs[index].get('image2')).getDownloadURL();
+            final image3Url = await storageRef.child(menuData.docs[index].get('image3')).getDownloadURL();
+
+            imgMenu.add(image1Url);
+            imgMenu.add(image2Url);
+            imgMenu.add(image3Url);
+
+          } on FirebaseException catch (e) {
+          // Handle any errors.
+          } 
+
+      //}
+      return imgMenu;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // final titleStyle = theme.textTheme.headlineSmall!.copyWith(
-    //   color: Colors.white,
-    // );
+
     final descriptionStyle = theme.textTheme.titleMedium!;
 
-    return FutureBuilder<String>(
+    
+    return FutureBuilder<List<String>>(
       future: getMenuImages(index, menuData),
-      builder: (context, AsyncSnapshot<String> snapshot){
-         if (snapshot.hasData) {
-          return SafeArea(
-            top: false,
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 350,
-                    child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 200,
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                // In order to have the ink splash appear above the image, you
-                                // must use Ink.image. This allows the image to be painted as
-                                // part of the Material and display ink effects above it. Using
-                                // a standard Image will obscure the ink splash.
-                                child: Ink.image(
-                                  image: CachedNetworkImageProvider(snapshot.data.toString()),
-                                  fit: BoxFit.cover,
-                                  child: Container(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Description and share/explore buttons.
-                        Semantics(
-                          container: true,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                            child: DefaultTextStyle(
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              style: descriptionStyle,
+      builder: (context, AsyncSnapshot<List<String>> snapshot1){
+        if (snapshot1.hasData) {
+        return FutureBuilder<String>(
+          future: getMenuImagesMini(index, menuData),
+          builder: (context, AsyncSnapshot<String> snapshot2){
+            if (snapshot2.hasData) {
+              return SafeArea(
+                top: false,
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 350,
+                        child: Card(
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () {
+                              print(index);
+                              print(snapshot1);
+                            },
+                            splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                            highlightColor: Colors.transparent,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // This array contains the three line description on each card
-                                  // demo.
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Text(
-                                      //'Rooms : ${tempList.join(', ')}',
-                                      '${menuData.docs[index].get('name')} - ${menuData.docs[index].get('price')} ${menuData.docs[index].get('currency')}',
-                                      style: descriptionStyle.copyWith(color: Colors.black54),
+                                  SizedBox(
+                                    height: 200,
+                                    child: Stack(
+                                      children: [
+                                        Positioned.fill(
+                                          // In order to have the ink splash appear above the image, you
+                                          // must use Ink.image. This allows the image to be painted as
+                                          // part of the Material and display ink effects above it. Using
+                                          // a standard Image will obscure the ink splash.
+                                          child: Ink.image(
+                                            image: CachedNetworkImageProvider(snapshot2.data.toString()),
+                                            fit: BoxFit.cover,
+                                            child: Container(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Text('${menuData.docs[index].get('description')}'),
-                                  //Text(
-                                  //    //'Rooms : ${tempList.join(', ')}',
-                                  //    '${menuData.docs[index].get('price')}',
-                                  //    style: descriptionStyle.copyWith(color: Colors.black54),
-                                  //  )                              
+                                  // Description and share/explore buttons.
+                                  Semantics(
+                                    container: true,
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                                      child: DefaultTextStyle(
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: descriptionStyle,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // This array contains the three line description on each card
+                                            // demo.
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 8),
+                                              child: Text(
+                                                //'Rooms : ${tempList.join(', ')}',
+                                                '${menuData.docs[index].get('name')} - ${menuData.docs[index].get('price')} ${menuData.docs[index].get('currency')}',
+                                                style: descriptionStyle.copyWith(color: Colors.black54),
+                                              ),
+                                            ),
+                                            Text('${menuData.docs[index].get('description')}'),
+                                            //Text(
+                                            //    //'Rooms : ${tempList.join(', ')}',
+                                            //    '${menuData.docs[index].get('price')}',
+                                            //    style: descriptionStyle.copyWith(color: Colors.black54),
+                                            //  )                              
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                    )
-                  )
-                ]
-          )
-          )
-          );
-    } else {
-      return const CircularProgressIndicator();
-    }
+                              )
+                          )
+                        )
+                      )
+                    ]
+              )
+              )
+              );
+            } else {
+              return const CircularProgressIndicator();
+            }
+          }
+        );
+        }
+        else {
+              return const CircularProgressIndicator();
+            }
       }
     );
   }
