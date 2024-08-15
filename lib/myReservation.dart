@@ -193,11 +193,11 @@ class _MesReservationsState extends State<MesReservations> {
 
                       for (var j = 0; j < reservationData.docs[index].get('room').length; j++) {
 
-                      for (var element in roomData.docs) {
-                        if (element.id == reservationData.docs[index].get('room')[j].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(room/', (match) => '').replaceAllMapped(')', (match) => '')) {
-                          tempList.add(element.get('name'));
+                        for (var element in roomData.docs) {
+                          if (element.id == reservationData.docs[index].get('room')[j].toString().replaceAllMapped('DocumentReference<Map<String, dynamic>>(room/', (match) => '').replaceAllMapped(')', (match) => '')) {
+                            tempList.add(element.get('name'));
+                          }
                         }
-                      }
                       }
                       
                       return ResaContent(context: context,index: index,reservationData: reservationData, roomData: roomData, tempList: tempList);
@@ -367,16 +367,16 @@ class ResaContent extends StatelessWidget {
                                 )
                                 ]),
                                 Row(children: [
-                                for (var j = 3; j < tempList.length; j++)
-                        
-                                if (j < tempList.length)
-                                TextButton(
-                                  onPressed: () {},
-                                  style: TextButton.styleFrom(
-                                    textStyle: const TextStyle(fontSize: 15),
-                                  ),
-                                  child: Text(tempList[j]),
-                                )
+                                  for (var j = 3; j < tempList.length; j++)
+                          
+                                  if (j < tempList.length)
+                                  TextButton(
+                                    onPressed: () {},
+                                    style: TextButton.styleFrom(
+                                      textStyle: const TextStyle(fontSize: 15),
+                                    ),
+                                    child: Text(tempList[j]),
+                                  )
                                 ])
                               ],
                             ),
