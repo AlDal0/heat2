@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'news.dart';
 import 'resaRoom.dart';
-import 'resaMenu.dart';
+import 'menu.dart';
+import 'room.dart';
 import 'myReservation.dart';
 
 class Accueil extends StatelessWidget {
@@ -42,7 +43,7 @@ class Accueil extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const ResaRoomHome()),
                 );
               },
-              child: const Text('Room booking'),
+              child: const Text('Booking'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
@@ -52,7 +53,20 @@ class Accueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ResaMenuHome()),
+                  MaterialPageRoute(builder: (context) => const RoomHome()),
+                );
+              },
+              child: const Text('Rooms'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50)
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MenuHome()),
                 );
               },
               child: const Text('Menus'),
@@ -134,6 +148,16 @@ class Accueil extends StatelessWidget {
                 Navigator.pushNamed(context, '/resaRoom');
                
                 //Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bed),
+              title: const Text('Rooms'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pushNamed(context, '/rooms');
               },
             ),
             ListTile(

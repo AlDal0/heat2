@@ -7,23 +7,17 @@ import 'package:carousel_slider/carousel_slider.dart';
 FirebaseFirestore db = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
-
-//String imgMenuMini = '';
-//List<String> imgMenu = [];
-
-class ResaMenuHome extends StatelessWidget {
-  const ResaMenuHome({super.key});
+class RoomHome extends StatelessWidget {
+  const RoomHome({super.key});
 
   @override
   Widget build(BuildContext context) {
 
-    //print(FirebaseAuth.instance.currentUser);
-
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Menus'),
+          title: const Text('Rooms'),
           scrolledUnderElevation: 0),
-        body: const Menus(),
+        body: const Rooms(),
         drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
@@ -114,14 +108,14 @@ class ResaMenuHome extends StatelessWidget {
   }
 }
 
-class Menus extends StatefulWidget {
+class Rooms extends StatefulWidget {
 
-  const Menus({Key? key}) : super(key: key);
+  const Rooms({Key? key}) : super(key: key);
   @override
     _MenusState createState() => _MenusState();
 }
 
-class _MenusState extends State<Menus> {
+class _MenusState extends State<Rooms> {
   
   final Stream<QuerySnapshot> menuStream = FirebaseFirestore.instance.collection('menu').snapshots();
 

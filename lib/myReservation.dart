@@ -189,7 +189,7 @@ class _MesReservationsState extends State<MesReservations> {
                   //padding: const EdgeInsets.symmetric(vertical: 8),
                   itemBuilder: (context, index) {
                     
-                      var tempList = [];
+                      List<String> tempList = [];
 
                       for (var j = 0; j < reservationData.docs[index].get('room').length; j++) {
 
@@ -219,9 +219,9 @@ class ResaContent extends StatelessWidget {
 
   final BuildContext context;
   final int index;
-  final dynamic reservationData;
-  final dynamic roomData;
-  final List<dynamic> tempList;
+  final QuerySnapshot<Object?> reservationData;
+  final QuerySnapshot<Object?> roomData;
+  final List<String> tempList;
 
   Future<String> getRoomImages(String roomSelectedToGetImage, roomSnapshotData) async {
 
@@ -260,13 +260,16 @@ class ResaContent extends StatelessWidget {
     // );
     final descriptionStyle = theme.textTheme.titleMedium!;
 
-    final tsdateStart = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].data()['dateStart'].toDate());
-    final tsdateEnd = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].data()['dateEnd'].toDate());
+    final tsdateStart = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].get('dateStart').toDate());
+    final tsdateEnd = DateFormat.yMMMMd('en_US').format(reservationData.docs[index].get('dateEnd').toDate());
 
     return FutureBuilder<String>(
       future: getRoomImages(tempList[0].toString(), roomData),
       builder: (context, AsyncSnapshot<String> snapshot){
          if (snapshot.hasData) {
+          
+          tempList.sort();
+         
           return SafeArea(
             top: false,
             bottom: false,
@@ -275,7 +278,7 @@ class ResaContent extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 330,
+                    height: 380,
                     child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(
@@ -296,23 +299,6 @@ class ResaContent extends StatelessWidget {
                                   child: Container(),
                                 ),
                               ),
-                              // Positioned(
-                              //   bottom: 16,
-                              //   left: 16,
-                              //   right: 16,
-                              //   child: FittedBox(
-                              //     fit: BoxFit.scaleDown,
-                              //     alignment: Alignment.centerLeft,
-                              //     child: Semantics(
-                              //       container: true,
-                              //       header: true,
-                              //       child: Text(
-                              //         'Réservation : ${reservationData.docs[index].id}',
-                              //         style: titleStyle,
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),
@@ -333,54 +319,49 @@ class ResaContent extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.only(bottom: 8),
                                     child: Text(
-                                      //'Rooms : ${tempList.join(', ')}',
                                       'Reservation : ${reservationData.docs[index].id}',
                                       style: descriptionStyle.copyWith(color: Colors.black54),
                                     ),
                                   ),
-                                  Text('Start : $tsdateStart -> End : $tsdateEnd'),
-                                  //Text('Fin : $tsdateEnd'),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Text(
+                                      'Start : $tsdateStart -> End : $tsdateEnd',
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text(
+                                      'Total length of stay : ${reservationData.docs[index].get('stayLength')} night(s)',
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Row(children: [
+                                      const Text('Rooms: '),
+                                      for (var i = 0; i < 3; i++)
+                                        if (i < tempList.length) 
+                                          TextButton(
+                                            onPressed: () {},
+                                            style: TextButton.styleFrom(
+                                              textStyle: const TextStyle(fontSize: 15),
+                                            ),
+                                            child: Text(tempList[i]),
+                                          )
+                                    ]),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0),
+                                    child: Text(
+                                      'Total amount : ${reservationData.docs[index].get('totalAmount')} EUR',
+                                      style: const TextStyle(fontWeight:FontWeight.bold)
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
                           ),
                         ),
-                          // share, explore buttons
-                          Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: OverflowBar(
-                              alignment: MainAxisAlignment.start,
-                              //spacing: 8,
-                              children: [
-                                Row(children: [
-
-                                
-                                for (var i = 0; i < 3; i++)
-                      
-                                if (i < tempList.length)
-                                TextButton(
-                                  onPressed: () {},
-                                  style: TextButton.styleFrom(
-                                    textStyle: const TextStyle(fontSize: 15),
-                                  ),
-                                  child: Text(tempList[i]),
-                                )
-                                ]),
-                                Row(children: [
-                                  for (var j = 3; j < tempList.length; j++)
-                          
-                                  if (j < tempList.length)
-                                  TextButton(
-                                    onPressed: () {},
-                                    style: TextButton.styleFrom(
-                                      textStyle: const TextStyle(fontSize: 15),
-                                    ),
-                                    child: Text(tempList[j]),
-                                  )
-                                ])
-                              ],
-                            ),
-                          ),
                       ],
                     )
                     )
