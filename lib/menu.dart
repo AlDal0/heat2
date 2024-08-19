@@ -119,7 +119,7 @@ class Menus extends StatefulWidget {
 
 class _MenusState extends State<Menus> {
   
-  final Stream<QuerySnapshot> menuStream = FirebaseFirestore.instance.collection('menu').snapshots();
+  final Stream<QuerySnapshot> menuStream = FirebaseFirestore.instance.collection('menu').orderBy('name').snapshots();
 
   
   @override

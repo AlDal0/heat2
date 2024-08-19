@@ -112,29 +112,29 @@ class Rooms extends StatefulWidget {
 
   const Rooms({Key? key}) : super(key: key);
   @override
-    _MenusState createState() => _MenusState();
+    _RoomsState createState() => _RoomsState();
 }
 
-class _MenusState extends State<Rooms> {
+class _RoomsState extends State<Rooms> {
   
-  final Stream<QuerySnapshot> menuStream = FirebaseFirestore.instance.collection('menu').snapshots();
+  final Stream<QuerySnapshot> roomStream = FirebaseFirestore.instance.collection('room').orderBy('name').snapshots();
 
   
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: menuStream,
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> menuSnapshot) {
+      stream: roomStream,
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> roomSnapshot) {
             
-                if (menuSnapshot.hasError) {
+                if (roomSnapshot.hasError) {
                   return const Text('Something went wrong');
                 }
 
-                if (!menuSnapshot.hasData) {
+                if (!roomSnapshot.hasData) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                final menuData = menuSnapshot.requireData;
+                final roomData = roomSnapshot.requireData;
 
                 final ScrollController scrollController = ScrollController();
 
@@ -144,13 +144,13 @@ class _MenusState extends State<Rooms> {
                 controller: scrollController,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: menuData.size,
+                  itemCount: roomData.size,
                   controller: scrollController,
                   //restorationId: 'list_demo_list_view',
                   //padding: const EdgeInsets.symmetric(vertical: 8),
                   itemBuilder: (context, index) {
        
-                    return MenuContent(context: context, index: index, menuData: menuData);
+                    return RoomContent(context: context, index: index, roomData: roomData);
                   }
                 )
                 );
@@ -161,77 +161,55 @@ class _MenusState extends State<Rooms> {
               }
 }
 
-Future<String> getMenuImagesMini(int index, menuData) async {
+Future<String> getRoomImagesMini(int index, roomData) async {
 
-    String menuImageMini = '';
+    String roomImageMini = '';
 
           try {
 
-            final image1Url = await storageRef.child(menuData.docs[index].get('image1')).getDownloadURL();
+            final image1Url = await storageRef.child(roomData.docs[index].get('image1')).getDownloadURL();
             
-            menuImageMini = image1Url;
+            roomImageMini = image1Url;
 
           } on FirebaseException catch (e) {
           // Handle any errors.
           } 
 
-      return menuImageMini;
+      return roomImageMini;
 }
 
-Future<List<String>> getMenuImages(int index, menuData) async {
+Future<List<String>> getRoomImages(int index, roomData) async {
 
-    List<String> menuImagesList = [];
-    //print(imgMenu);
+    List<String> roomImagesList = [];
+    //print(imgroom);
 
           try {
 
-            final image1Url = await storageRef.child(menuData.docs[index].get('image1')).getDownloadURL();
-            final image2Url = await storageRef.child(menuData.docs[index].get('image2')).getDownloadURL();
-            final image3Url = await storageRef.child(menuData.docs[index].get('image3')).getDownloadURL();
+            final image1Url = await storageRef.child(roomData.docs[index].get('image1')).getDownloadURL();
+            final image2Url = await storageRef.child(roomData.docs[index].get('image2')).getDownloadURL();
+            final image3Url = await storageRef.child(roomData.docs[index].get('image3')).getDownloadURL();
+            final image4Url = await storageRef.child(roomData.docs[index].get('image4')).getDownloadURL();
+            final image5Url = await storageRef.child(roomData.docs[index].get('image5')).getDownloadURL();
 
-            menuImagesList.add(image1Url);
-            menuImagesList.add(image2Url);
-            menuImagesList.add(image3Url);
+            roomImagesList.add(image1Url);
+            roomImagesList.add(image2Url);
+            roomImagesList.add(image3Url);
+            roomImagesList.add(image4Url);
+            roomImagesList.add(image5Url);
 
           } on FirebaseException catch (e) {
           // Handle any errors.
-          } 
-
-      //}
+          }
       
-      return menuImagesList;
+      return roomImagesList;
 }
 
-Future<List<String>> getMenuDetails(int index, menuData) async {
-
-    List<String> menuDetailsList = [];
-    //print(imgMenu);
-
-          try {
-
-            final starter = menuData.docs[index].get('starter');
-            final mainCourse = menuData.docs[index].get('mainCourse');
-            final dessert = menuData.docs[index].get('dessert');
-
-            menuDetailsList.add(starter);
-            menuDetailsList.add(mainCourse);
-            menuDetailsList.add(dessert);
-
-          } on FirebaseException catch (e) {
-          // Handle any errors.
-          } 
-
-      //}
-      //print(menuDetailsList);
-      return menuDetailsList;
-}
-
-class MenuContent extends StatelessWidget {
-  const MenuContent({super.key, required this.context, required this.index, required this.menuData});
+class RoomContent extends StatelessWidget {
+  const RoomContent({super.key, required this.context, required this.index, required this.roomData});
 
   final BuildContext context;
   final int index;
-  final QuerySnapshot<Object?> menuData;
+  final QuerySnapshot<Object?> roomData;
 
   
 
@@ -243,17 +221,14 @@ class MenuContent extends StatelessWidget {
 
     
     return FutureBuilder<List<String>>(
-      future: getMenuImages(index, menuData),
+      future: getRoomImages(index, roomData),
       builder: (context, AsyncSnapshot<List<String>> snapshot1){
         if (snapshot1.hasData) {
         return FutureBuilder<String>(
-          future: getMenuImagesMini(index, menuData),
+          future: getRoomImagesMini(index, roomData),
           builder: (context, AsyncSnapshot<String> snapshot2){
             if (snapshot2.hasData) {
-              return FutureBuilder<List<String>>(
-                future: getMenuDetails(index, menuData),
-                builder: (context, AsyncSnapshot<List<String>> snapshot3){
-                  if (snapshot3.hasData) {
+           
                     return SafeArea(
                       top: false,
                       bottom: false,
@@ -262,12 +237,12 @@ class MenuContent extends StatelessWidget {
                         child: Column(
                           children: [
                             SizedBox(
-                              height: 350,
+                              height: 300,
                               child: Card(
                                 clipBehavior: Clip.antiAlias,
                                 child: InkWell(
                                   onTap: () async {
-                                    _navigateAndDisplaySelection(context, index, snapshot1, menuData.docs[index].get('name'), snapshot3);
+                                    _navigateAndDisplaySelection(context, index, snapshot1, roomData.docs[index].get('name'));
                                   },
                                   splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
                                   highlightColor: Colors.transparent,
@@ -310,14 +285,14 @@ class MenuContent extends StatelessWidget {
                                                     padding: const EdgeInsets.only(bottom: 8),
                                                     child: Text(
                                                       //'Rooms : ${tempList.join(', ')}',
-                                                      '${menuData.docs[index].get('name')} - ${menuData.docs[index].get('price')} ${menuData.docs[index].get('currency')}',
+                                                      '${roomData.docs[index].get('name')} - ${roomData.docs[index].get('price')} ${roomData.docs[index].get('currency')}',
                                                       style: descriptionStyle.copyWith(color: Colors.black54),
                                                     ),
                                                   ),
-                                                  Text('${menuData.docs[index].get('description')}'),
+                                                  Text('${roomData.docs[index].get('description')}'),
                                                   //Text(
                                                   //    //'Rooms : ${tempList.join(', ')}',
-                                                  //    '${menuData.docs[index].get('price')}',
+                                                  //    '${roomData.docs[index].get('price')}',
                                                   //    style: descriptionStyle.copyWith(color: Colors.black54),
                                                   //  )                              
                                                 ],
@@ -334,7 +309,8 @@ class MenuContent extends StatelessWidget {
                     )
                     )
                     );
-            } else {
+        
+              } else {
               return const CircularProgressIndicator();
             }
             }
@@ -345,20 +321,15 @@ class MenuContent extends StatelessWidget {
           }
         );
         }
-        else {
-              return const CircularProgressIndicator();
-        }
-      }
-    );
-  }
 }
 
-Future<void> _navigateAndDisplaySelection(BuildContext context, int index, AsyncSnapshot<List<String>> menuImages, String menuSelected, AsyncSnapshot<List<String>> menuDetails) async {
+
+Future<void> _navigateAndDisplaySelection(BuildContext context, int index, AsyncSnapshot<List<String>> roomImages, String roomSelected) async {
     // Navigator.push returns a Future that completes after calling
     // Navigator.pop on the Selection Screen.
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(index, menuSelected, menuImages, menuDetails)),
+      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(index, roomSelected, roomImages)),
     );
 
     
@@ -368,15 +339,14 @@ Future<void> _navigateAndDisplaySelection(BuildContext context, int index, Async
 class CarouselWithIndicatorDemo extends StatefulWidget {
   
   final int index;
-  final String menuSelected;
-  final AsyncSnapshot<List<String>> menuImages;
-  final AsyncSnapshot<List<String>> menuDetails;
+  final String roomSelected;
+  final AsyncSnapshot<List<String>> roomImages;
+
 
   const CarouselWithIndicatorDemo(
     this.index,
-    this.menuSelected,
-    this.menuImages,
-    this.menuDetails,
+    this.roomSelected,
+    this.roomImages,
     {super.key}
     );
 
@@ -396,7 +366,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.menuSelected),
+        title: Text(widget.roomSelected),
         scrolledUnderElevation: 0),
       body: SafeArea(
       child: Column(
@@ -405,7 +375,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
         children: [
         //Expanded(
           CarouselSlider(
-            items: getListWidget(widget.index, widget.menuSelected, widget.menuImages, widget.menuDetails),
+            items: getListWidget(widget.index, widget.roomSelected, widget.roomImages),
             carouselController: _controller,
             options: CarouselOptions(
                 autoPlay: false,
@@ -421,7 +391,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
        // ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.menuImages.data!.asMap().entries.map((entry) {
+          children: widget.roomImages.data!.asMap().entries.map((entry) {
             return GestureDetector(
               onTap: () => _controller.animateToPage(entry.key),
               child: Container(
@@ -451,9 +421,9 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   }
 }
 
-List<Widget> getListWidget(int index, String menuSelected, AsyncSnapshot<List<String>> menuImages, AsyncSnapshot<List<String>> menuDetails) {
+List<Widget> getListWidget(int index, String roomSelected, AsyncSnapshot<List<String>> roomImages) {
 
-List<Widget> imageSliders = menuImages.data!
+List<Widget> imageSliders = roomImages.data!
     .map((item) => Container(
       margin: const EdgeInsets.all(5.0),
       child: ClipRRect(
@@ -479,7 +449,7 @@ List<Widget> imageSliders = menuImages.data!
                   padding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 20.0),
                   child: Text(
-                    menuDetails.data![menuImages.data!.indexOf(item)],
+                    'Photo ${roomImages.data!.indexOf(item)+1}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20.0,
