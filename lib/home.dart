@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'news.dart';
-import 'resaRoom.dart';
+import 'resaHome.dart';
 import 'menu.dart';
 import 'room.dart';
 import 'myReservation.dart';
@@ -40,7 +40,7 @@ class Accueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ResaRoomHome()),
+                  MaterialPageRoute(builder: (context) => const ResaHome()),
                 );
               },
               child: const Text('Booking'),
@@ -139,7 +139,7 @@ class Accueil extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Room booking'),
+              title: const Text('Booking'),
               onTap: () {
                 // Update the state of the app
                 // ...

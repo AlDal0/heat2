@@ -1,14 +1,16 @@
-import 'resaHome.dart';
 import 'dart:collection';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 
+FirebaseFirestore db = FirebaseFirestore.instance;
+final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
 Map<DateTime, List<Event>> resaMapping= {DateTime(2021,1,1): [const Event('room')]};
 
@@ -18,6 +20,8 @@ List<DateTime> resaDateList = [];
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year, kToday.month - 1, kToday.day);
 final kLastDay = DateTime(kToday.year + 5, kToday.month, kToday.day);
+
+ScrollController _mainController = ScrollController();
 
 
 var result;
@@ -220,11 +224,117 @@ String getRoomCurrency(roomSnapshotData, roomSelected) {
 
 }
 
+class ResaRoomHome extends StatelessWidget {
+  const ResaRoomHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text('Room booking'),
+          toolbarHeight: 30,
+          scrolledUnderElevation: 0),
+        body: SingleChildScrollView(
+          controller: _mainController,
+          child: SizedBox(
+            height: MediaQuery.sizeOf(context).height,
+            child: const Center(child: ResaRoom())
+          )
+        ),
+        drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const SizedBox(
+            height: 200,
+            width: double.infinity,
+            child: DrawerHeader(
+              decoration: BoxDecoration(
+                //color: Colors.blue,
+                image: DecorationImage(
+                  image: AssetImage('images/PXL_20230827_183250894.MP~2.jpg'),
+                  //fit: BoxFit.fill
+                  ), 
+              ),
+              child: Text(''),
+            ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Home'),
+                    onTap: () {
+
+                      Navigator.pushNamed(context, '/home');
+                      
+                    },
+            ),
+            ListTile(
+              leading: const Icon(Icons.account_box),
+              title: const Text('My Reservations'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pushNamed(context, '/reservations');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.newspaper),
+              title: const Text('News'),
+                    onTap: () {
+
+                      Navigator.pushNamed(context, '/news');
+                      
+                    },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              title: const Text('Room booking'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+
+                Navigator.pushNamed(context, '/resaRoom');
+               
+                //Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.local_restaurant),
+              title: const Text('Menus'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pushNamed(context, '/menus');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Log out'),
+              onTap: () {
+                // Update the state of the app
+                // ...
+                // Then close the drawer
+                Navigator.pushNamedAndRemoveUntil(context,'/login', (_) => false);
+              },
+            )
+          ],
+        ),
+      ),
+      );
+  }
+}
+
 class ResaRoom extends StatefulWidget {
 
-  final ScrollController mainControllerRoom;
-
-  const ResaRoom(this.mainControllerRoom, {Key? key}) : super(key: key);
+  const ResaRoom({Key? key}) : super(key: key);
   @override
     _ResaRoomState createState() => _ResaRoomState();
 }
@@ -259,7 +369,6 @@ class _ResaRoomState extends State<ResaRoom> {
     _selectedDay = _focusedDay;
     _bookedRooms = ValueNotifier(_getEventsForDay(_selectedDay!));
     _selectedDate = ValueNotifier(_getDatesForDay(_selectedDay!,_selectedDay!));
-    roomSelectedList = [];
 
    
     
@@ -488,13 +597,21 @@ class _ResaRoomState extends State<ResaRoom> {
     );
   }
 
-  Widget _getListItemTile(BuildContext context, int index, String roomSelected, roomSnapshot, snapshotImage, ScrollController mainScrollController) {
+  Widget _getListItemTile(BuildContext context, int index, String roomSelected, roomSnapshot, snapshotImage, ScrollController scrollController) {
 
     var key = GlobalKey();
+
+    //print(getRooms(roomSnapshot.requireData));
+
+    //var twoDList = List<List>.generate(getRooms(roomSnapshot.requireData).length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
 
     var roomPrice = getRoomPrice(roomSnapshot.requireData, roomSelected);
 
     var roomCurrency = getRoomCurrency(roomSnapshot.requireData, roomSelected);
+
+  //twoDList[0][1] = "deneme";
+
+  //print(twoDList);
 
     return InkWell(
       onTap: () {
@@ -536,8 +653,6 @@ class _ResaRoomState extends State<ResaRoom> {
 
             roomSelectedList.add(roomSelected);
 
-            print(roomSelectedList);
-
             buttonenabled = true;
 
             //_mainController.jumpTo(_mainController.positions.last.maxScrollExtent);
@@ -550,7 +665,7 @@ class _ResaRoomState extends State<ResaRoom> {
 
             
 
-            mainScrollController.animateTo(mainScrollController.positions.last.maxScrollExtent, duration: Duration(seconds: 1), curve: Curves.ease);
+            _mainController.animateTo(_mainController.positions.last.maxScrollExtent, duration: Duration(seconds: 1), curve: Curves.ease);
             //Duration(seconds: 1), Curves.ease
             
           });
@@ -977,7 +1092,6 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
                         result.add(roomList[j]);
                         
                       }
-
                     };
               
                     for (int i = 0; i < result.length; i++) {
@@ -1012,7 +1126,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
                           //getRoomMiniImage(result[index].toString(), roomSnapshot.requireData);
                           //print(result[index]);
                           //getRoomImages(result[index].toString(), roomSnapshot.requireData);
-                                return _getListItemTile(context, index, result[index].toString(), roomSnapshot, snapshot.data, widget.mainControllerRoom);
+                                return _getListItemTile(context, index, result[index].toString(), roomSnapshot, snapshot.data, scrollControllerList);
                               }
                               else {
                                 return const CircularProgressIndicator();

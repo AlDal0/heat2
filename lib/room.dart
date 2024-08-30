@@ -70,7 +70,7 @@ class RoomHome extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              title: const Text('Room booking'),
+              title: const Text('Booking'),
               onTap: () {
                 // Update the state of the app
                 // ...

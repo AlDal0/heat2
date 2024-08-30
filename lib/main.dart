@@ -4,7 +4,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'home.dart';
 import 'loginScreen.dart';
 import 'news.dart';
-import 'resaRoom.dart';
+import 'resaHome.dart';
 import 'menu.dart';
 import 'room.dart';
 import 'myReservation.dart';
@@ -36,7 +36,7 @@ void main() async {
                 '/login': (context) => const LoginScreen(),
                 '/home': (context) => const Accueil(),
                 '/news': (context) => const Actualite(),
-                '/resaRoom': (context) => const ResaRoomHome(),
+                '/resaRoom': (context) => const ResaHome(),
                 '/menus': (context) => const MenuHome(),
                 '/rooms': (context) => const RoomHome(),
                 '/reservations': (context) => const MesReservationsHome(),
