@@ -56,7 +56,7 @@ class RoomHome extends StatelessWidget {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/reservations');
+                Navigator.pushNamed(context, '/myResaHome');
               },
             ),
             ListTile(
@@ -76,7 +76,7 @@ class RoomHome extends StatelessWidget {
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resaRoom');
+                Navigator.pushNamed(context, '/resaHome');
                
                 //Navigator.pop(context);
               },

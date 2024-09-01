@@ -3,7 +3,7 @@ import 'news.dart';
 import 'resaHome.dart';
 import 'menu.dart';
 import 'room.dart';
-import 'myReservation.dart';
+import 'myResaHome.dart';
 
 class Accueil extends StatelessWidget {
   const Accueil({super.key});
@@ -79,7 +79,7 @@ class Accueil extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MesReservationsHome()),
+                  MaterialPageRoute(builder: (context) => const MyResaHome()),
                 );
               },
               child: const Text('My Reservations'),
@@ -125,7 +125,7 @@ class Accueil extends StatelessWidget {
                 // Update the state of the app
                 // ...
                 // Then close the drawer
-                Navigator.pushNamed(context, '/reservations');
+                Navigator.pushNamed(context, '/myResaHome');
               },
             ),
             ListTile(
@@ -145,7 +145,7 @@ class Accueil extends StatelessWidget {
                 // ...
                 // Then close the drawer
 
-                Navigator.pushNamed(context, '/resaRoom');
+                Navigator.pushNamed(context, '/resaHome');
                
                 //Navigator.pop(context);
               },

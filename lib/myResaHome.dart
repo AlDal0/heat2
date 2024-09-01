@@ -1,41 +1,61 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'myResaRoom.dart';
+import 'myResaRestaurant.dart';
 
+FirebaseFirestore db = FirebaseFirestore.instance;
+final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
-class Actualite extends StatelessWidget {
-  const Actualite({super.key});
+ScrollController _mainControllerRoom = ScrollController();
+ScrollController _mainControllerRestaurant = ScrollController();
+
+String imgList = '';
+
+class MyResaHome extends StatelessWidget {
+  const MyResaHome({super.key});
 
   @override
   Widget build(BuildContext context) {
 
-    final ScrollController scrollController = ScrollController();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('News'),
-        scrolledUnderElevation: 0),
-      body: Scrollbar(
-        thickness: 10.0,
-        controller: scrollController,
-        child: ListView(
-          shrinkWrap: true,
-          controller: scrollController,
-          //restorationId: 'list_demo_list_view',
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            for (int index = 1; index < 21; index++)
-              ListTile(
-                leading: const Text('01/01/2001'),
-                title: Text(
-                  "Post: $index",
-                ),
-                subtitle: const Text(
-                  "Summary"),
-                
+        appBar: AppBar(
+          title: const Text('My Reservations'),
+          scrolledUnderElevation: 0,
+          bottom: const TabBar(
+            tabs: <Widget>[
+              Tab(
+                icon: Icon(Icons.bed),
               ),
-          ],
-        ),
-      ),
-      drawer: Drawer(
+              Tab(
+                icon: Icon(Icons.local_restaurant),
+              ),
+            ],
+          ),
+          ),
+        body: TabBarView(
+          children: <Widget>[
+            SingleChildScrollView(
+              controller: _mainControllerRoom,
+              child: SizedBox(
+                height: MediaQuery.sizeOf(context).height,
+                child: Center(child: MyResaRoom(_mainControllerRoom))
+              )
+            ),
+            SingleChildScrollView(
+              controller: _mainControllerRestaurant,
+              child: SizedBox(
+                height: MediaQuery.sizeOf(context).height,
+                child: Center(child: MyResaRestaurant(_mainControllerRestaurant))
+              )
+            ),
+          ]
+          ),
+        drawer: Drawer(
         // Add a ListView to the drawer. This ensures the user can scroll
         // through the options in the drawer if there isn't enough vertical
         // space to fit everything.
@@ -121,7 +141,6 @@ class Actualite extends StatelessWidget {
           ],
         ),
       ),
-      
-    );
+      );
   }
 }

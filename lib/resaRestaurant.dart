@@ -25,8 +25,7 @@ final kLastDay = DateTime(kToday.year + 5, kToday.month, kToday.day);
 
 var result;
 
-List<String> imgList = [
-  ];
+List<String> imgList = [];
 
 //var imgMini = '';
 
@@ -175,16 +174,17 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> menuSelectedListToB
 
     final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
     final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
-    final stayLength = dateRange.length-1;
+    final length = dateRange.length-1;
 
-    final resaAmountTotal = resaAmountDay * stayLength;
+    final resaAmountTotal = resaAmountDay * length;
 
     await reservation.add({
       'dateStart': dateStart,
       'dateEnd': dateEnd,
-      'stayLength': stayLength,
+      'length': length,
       'menu': menuId,
       'client': clientId,
+      'type': 'Restaurant',
       'totalAmount': resaAmountTotal,
       'currency': resaCurrency,
       'status': 'created',
@@ -192,7 +192,7 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> menuSelectedListToB
       'to': [FirebaseAuth.instance.currentUser!.email],
       'message': {
         'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $stayLength nights <br></br> Menus : ${menuSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length nights <br></br> Menus : ${menuSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
       }
     });
     
@@ -919,14 +919,14 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
                       
                     onPressed:buttonenabled?(){ //if buttonenabled == true then pass a function otherwise pass "null"
                         if(_rangeStart == null && _rangeEnd == null) {
-                          //addResa(_selectedDay, _selectedDay, roomSelectedList, _onRangeSelected);
+                          addResa(_selectedDay, _selectedDay, menuSelectedList, _onRangeSelected);
                         }
                         else if (_rangeEnd == null) {
                           _rangeEnd = _rangeStart;
-                          //addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
+                          addResa(_rangeStart, _rangeEnd, menuSelectedList, _onRangeSelected);
                         }
                         else {
-                          //addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
+                          addResa(_rangeStart, _rangeEnd, menuSelectedList, _onRangeSelected);
                         }
                         ScaffoldMessenger.of(context)
                           ..removeCurrentSnackBar()

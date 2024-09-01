@@ -7,7 +7,7 @@ import 'news.dart';
 import 'resaHome.dart';
 import 'menu.dart';
 import 'room.dart';
-import 'myReservation.dart';
+import 'myResaHome.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -36,10 +36,10 @@ void main() async {
                 '/login': (context) => const LoginScreen(),
                 '/home': (context) => const Accueil(),
                 '/news': (context) => const Actualite(),
-                '/resaRoom': (context) => const ResaHome(),
+                '/resaHome': (context) => const ResaHome(),
                 '/menus': (context) => const MenuHome(),
                 '/rooms': (context) => const RoomHome(),
-                '/reservations': (context) => const MesReservationsHome(),
+                '/myResaHome': (context) => const MyResaHome(),
               },
             ),
           )

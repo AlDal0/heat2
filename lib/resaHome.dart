@@ -1,16 +1,8 @@
 import 'package:heat/resaRoom.dart';
 import 'package:heat/resaRestaurant.dart';
-import 'dart:collection';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
@@ -98,7 +90,7 @@ class ResaHome extends StatelessWidget {
                   // Update the state of the app
                   // ...
                   // Then close the drawer
-                  Navigator.pushNamed(context, '/reservations');
+                  Navigator.pushNamed(context, '/myResaHome');
                 },
               ),
               ListTile(
@@ -118,7 +110,7 @@ class ResaHome extends StatelessWidget {
                   // ...
                   // Then close the drawer
 
-                  Navigator.pushNamed(context, '/resaRoom');
+                  Navigator.pushNamed(context, '/resaHome');
                 
                   //Navigator.pop(context);
                 },

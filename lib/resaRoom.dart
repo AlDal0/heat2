@@ -220,6 +220,199 @@ String getRoomCurrency(roomSnapshotData, roomSelected) {
 
 }
 
+addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToBook, void onRangeSelectedFunction(DateTime? start, DateTime? end, DateTime focusedDay)) async {
+    CollectionReference reservation = FirebaseFirestore.instance.collection('reservation');
+    final snapshot1 = await db.collection('room').get();
+    final snapshot2 = await db.collection('client').get();
+    List<DocumentReference> roomId = [];
+    List<DateTime> dateRange = [];
+    List<String> roomSelectedListToBookAndPrice = [];
+    late DocumentReference clientId;
+    num resaAmountDay = 0;
+    String resaCurrency = "";
+     
+
+    //if (dateStart != null && dateEnd != null) {
+
+    var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
+
+    String clientNameEmail = "";
+    String clientSurnameEmail = "";
+
+    dateRange.add(date);
+
+    if (dateStart != dateEnd) {
+      do {
+
+        date = DateTime(date.year, date.month, date.day + 1);
+
+        dateRange.add(date);
+
+      }
+      while (DateTime(date.year, date.month, date.day) != DateTime(dateEnd!.year, dateEnd.month, dateEnd.day));
+
+    }
+
+    for (final document1 in snapshot1.docs) {
+
+      final data1 = document1.data();
+      if (resaCurrency == "") {
+        resaCurrency = data1['currency'];
+      }
+
+      if (roomSelectedListToBook.contains(data1['name'])) {
+
+        roomId.add(db.doc('/room/${document1.id}'));
+
+        resaAmountDay = resaAmountDay + data1['price'];
+        
+        roomSelectedListToBookAndPrice.add(data1['name']+ ' (' + data1['price'].toString() + ' $resaCurrency / night)');
+
+      }
+
+    }
+
+    for (final document2 in snapshot2.docs) {
+
+      final data2 = document2.data();
+
+      if (FirebaseAuth.instance.currentUser!.email!.contains(data2['email'])) {
+
+        clientId = db.doc('/client/${document2.id}');
+        clientNameEmail = data2['surname'];
+        clientSurnameEmail = data2['firstName'];
+
+      }
+
+    }
+
+    var mappingAdded = {
+      for (var item in List.generate(dateRange.length, (index) => index)) dateRange[item] : List.generate(roomSelectedListToBook.length,(i) {
+          return Event(roomSelectedListToBook[i]);
+        })
+          ..addAll({})
+    };
+
+
+    for (var j = 0; j < dateRange.length; j++) {
+      if (kEvents[dateRange[j]] != null) {
+
+        for (var k = 0; k < mappingAdded[dateRange[j]]!.length; k++) {
+
+            kEvents[dateRange[j]]!.add(mappingAdded[dateRange[j]]![k]);
+
+        }
+
+      }
+      else {
+        var listEvent = List.generate(roomSelectedListToBook.length,(i) {
+          return Event(roomSelectedListToBook[i]);
+        });
+          kEvents[dateRange[j]] = listEvent;
+
+      }
+
+    }
+
+    //DateTime.utc(dateStart.toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
+
+    final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
+    final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
+    final length = dateRange.length-1;
+
+    final resaAmountTotal = resaAmountDay * length;
+
+    await reservation.add({
+      'dateStart': dateStart,
+      'dateEnd': dateEnd,
+      'length': length,
+      'room': roomId,
+      'client': clientId,
+      'type': 'Room',
+      'totalAmount': resaAmountTotal,
+      'currency': resaCurrency,
+      'status': 'created',
+      'publisher': 'client',
+      'to': [FirebaseAuth.instance.currentUser!.email],
+      'message': {
+        'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length nights <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+      }
+    });
+    
+    onRangeSelectedFunction(dateStart, dateEnd, dateStart);
+
+  }
+
+  Future<String> getRoomMiniImage(String roomSelectedToGetImage, roomSnapshotData) async {
+
+  imgMini = '';
+
+  for (final document in roomSnapshotData.docs) {
+    var data = document.data();
+      if (data['name'].toString() == roomSelectedToGetImage) {
+
+        try {
+
+          final image1Url = await storageRef.child(data['image1']).getDownloadURL();
+
+          imgMini = image1Url;
+
+          // Data for "images/island.jpg" is returned, use this as needed.
+        } on FirebaseException catch (e) {
+        // Handle any errors.
+        }
+ 
+      }
+  }
+  return imgMini;
+}
+
+List<Widget> getListWidget(String roomSelected) {
+
+List<Widget> imageSliders = imgList
+    .map((item) => Container(
+      margin: const EdgeInsets.all(5.0),
+      child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          child: Stack(
+            children: <Widget>[
+              Image.network(item, fit: BoxFit.cover, width: 1000.0),
+              Positioned(
+                bottom: 0.0,
+                left: 0.0,
+                right: 0.0,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(200, 0, 0, 0),
+                        Color.fromARGB(0, 0, 0, 0)
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 20.0),
+                  child: Text(
+                    roomSelected,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )),
+    ))
+    .toList();
+    return imageSliders;
+}
+
+
 class ResaRoom extends StatefulWidget {
 
   final ScrollController mainControllerRoom;
@@ -536,8 +729,6 @@ class _ResaRoomState extends State<ResaRoom> {
 
             roomSelectedList.add(roomSelected);
 
-            print(roomSelectedList);
-
             buttonenabled = true;
 
             //_mainController.jumpTo(_mainController.positions.last.maxScrollExtent);
@@ -598,152 +789,7 @@ class _ResaRoomState extends State<ResaRoom> {
       );
 }
 
-addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToBook, void onRangeSelectedFunction(DateTime? start, DateTime? end, DateTime focusedDay)) async {
-    CollectionReference reservation = FirebaseFirestore.instance.collection('reservation');
-    final snapshot1 = await db.collection('room').get();
-    final snapshot2 = await db.collection('client').get();
-    List<DocumentReference> roomId = [];
-    List<DateTime> dateRange = [];
-    List<String> roomSelectedListToBookAndPrice = [];
-    late DocumentReference clientId;
-    num resaAmountDay = 0;
-    String resaCurrency = "";
-     
 
-    //if (dateStart != null && dateEnd != null) {
-
-    var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
-
-    String clientNameEmail = "";
-    String clientSurnameEmail = "";
-
-    dateRange.add(date);
-
-    if (dateStart != dateEnd) {
-      do {
-
-        date = DateTime(date.year, date.month, date.day + 1);
-
-        dateRange.add(date);
-
-      }
-      while (DateTime(date.year, date.month, date.day) != DateTime(dateEnd!.year, dateEnd.month, dateEnd.day));
-
-    }
-
-    for (final document1 in snapshot1.docs) {
-
-      final data1 = document1.data();
-      if (resaCurrency == "") {
-        resaCurrency = data1['currency'];
-      }
-
-      if (roomSelectedListToBook.contains(data1['name'])) {
-
-        roomId.add(db.doc('/room/${document1.id}'));
-
-        resaAmountDay = resaAmountDay + data1['price'];
-        
-        roomSelectedListToBookAndPrice.add(data1['name']+ ' (' + data1['price'].toString() + ' $resaCurrency / night)');
-
-      }
-
-    }
-
-    for (final document2 in snapshot2.docs) {
-
-      final data2 = document2.data();
-
-      if (FirebaseAuth.instance.currentUser!.email!.contains(data2['email'])) {
-
-        clientId = db.doc('/client/${document2.id}');
-        clientNameEmail = data2['surname'];
-        clientSurnameEmail = data2['firstName'];
-
-      }
-
-    }
-
-    var mappingAdded = {
-      for (var item in List.generate(dateRange.length, (index) => index)) dateRange[item] : List.generate(roomSelectedListToBook.length,(i) {
-          return Event(roomSelectedListToBook[i]);
-        })
-          ..addAll({})
-    };
-
-
-    for (var j = 0; j < dateRange.length; j++) {
-      if (kEvents[dateRange[j]] != null) {
-
-        for (var k = 0; k < mappingAdded[dateRange[j]]!.length; k++) {
-
-            kEvents[dateRange[j]]!.add(mappingAdded[dateRange[j]]![k]);
-
-        }
-
-      }
-      else {
-        var listEvent = List.generate(roomSelectedListToBook.length,(i) {
-          return Event(roomSelectedListToBook[i]);
-        });
-          kEvents[dateRange[j]] = listEvent;
-
-      }
-
-    }
-
-    //DateTime.utc(dateStart.toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
-
-    final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
-    final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
-    final stayLength = dateRange.length-1;
-
-    final resaAmountTotal = resaAmountDay * stayLength;
-
-    await reservation.add({
-      'dateStart': dateStart,
-      'dateEnd': dateEnd,
-      'stayLength': stayLength,
-      'room': roomId,
-      'client': clientId,
-      'totalAmount': resaAmountTotal,
-      'currency': resaCurrency,
-      'status': 'created',
-      'publisher': 'client',
-      'to': [FirebaseAuth.instance.currentUser!.email],
-      'message': {
-        'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $stayLength nights <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
-      }
-    });
-    
-    onRangeSelectedFunction(dateStart, dateEnd, dateStart);
-
-  }
-
-  Future<String> getRoomMiniImage(String roomSelectedToGetImage, roomSnapshotData) async {
-
-  imgMini = '';
-
-  for (final document in roomSnapshotData.docs) {
-    var data = document.data();
-      if (data['name'].toString() == roomSelectedToGetImage) {
-
-        try {
-
-          final image1Url = await storageRef.child(data['image1']).getDownloadURL();
-
-          imgMini = image1Url;
-
-          // Data for "images/island.jpg" is returned, use this as needed.
-        } on FirebaseException catch (e) {
-        // Handle any errors.
-        }
- 
-      }
-  }
-  return imgMini;
-}
 
 
   @override
@@ -761,8 +807,6 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
       return StreamBuilder<QuerySnapshot>(
       stream: roomStream,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> roomSnapshot) {
-
-        print(pixelRatio);
 
         if (roomSnapshot.hasError) {
           return const Text('Something went wrong');
@@ -1278,46 +1322,3 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   }
 }
 
-List<Widget> getListWidget(String roomSelected) {
-
-List<Widget> imageSliders = imgList
-    .map((item) => Container(
-      margin: const EdgeInsets.all(5.0),
-      child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          child: Stack(
-            children: <Widget>[
-              Image.network(item, fit: BoxFit.cover, width: 1000.0),
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color.fromARGB(200, 0, 0, 0),
-                        Color.fromARGB(0, 0, 0, 0)
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
-                  child: Text(
-                    roomSelected,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )),
-    ))
-    .toList();
-    return imageSliders;
-}
