@@ -1,20 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'myResaRoom.dart';
 import 'myResaRestaurant.dart';
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 final storageRef = FirebaseStorage.instanceFor(bucket: "gs://heat-e9529.appspot.com").ref();
 
-ScrollController _mainControllerRoom = ScrollController();
-ScrollController _mainControllerRestaurant = ScrollController();
-
-String imgList = '';
+//ScrollController _mainControllerRoom = ScrollController();
+//ScrollController _mainControllerRestaurant = ScrollController();
 
 class MyResaHome extends StatelessWidget {
   const MyResaHome({super.key});
@@ -22,7 +16,10 @@ class MyResaHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 2,
+      child: Scaffold(
         appBar: AppBar(
           title: const Text('My Reservations'),
           scrolledUnderElevation: 0,
@@ -39,20 +36,24 @@ class MyResaHome extends StatelessWidget {
           ),
         body: TabBarView(
           children: <Widget>[
-            SingleChildScrollView(
-              controller: _mainControllerRoom,
-              child: SizedBox(
+            //SingleChildScrollView(
+            //  controller: _mainControllerRoom,
+            //  child: SizedBox(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height,
-                child: Center(child: MyResaRoom(_mainControllerRoom))
-              )
-            ),
-            SingleChildScrollView(
-              controller: _mainControllerRestaurant,
-              child: SizedBox(
+                //child: Center(child: MyResaRoom(_mainControllerRoom))
+                child: const MyResaRoom()
+              ),
+            //),
+            //SingleChildScrollView(
+            //  controller: _mainControllerRestaurant,
+            //  child: SizedBox(
+              SizedBox(
                 height: MediaQuery.sizeOf(context).height,
-                child: Center(child: MyResaRestaurant(_mainControllerRestaurant))
+                //child: Center(child: MyResaRestaurant(_mainControllerRestaurant))
+                child: const MyResaRestaurant()
               )
-            ),
+            //),
           ]
           ),
         drawer: Drawer(
@@ -141,6 +142,7 @@ class MyResaHome extends StatelessWidget {
           ],
         ),
       ),
-      );
+      )
+    );
   }
 }

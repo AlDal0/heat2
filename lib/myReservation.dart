@@ -143,8 +143,11 @@ class _MesReservationsState extends State<MesReservations> {
         DocumentReference<Map<String, dynamic>> clientRef;
         final clientData = clientSnapshot.requireData;
         clientRef = db.collection('client').doc(clientData.docs[0].id);
+        
+        print(clientRef);
 
-        final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').where('client', isEqualTo: clientRef).snapshots();
+        //final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').where('client', isEqualTo: clientRef).snapshots();
+        final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').snapshots();
 
         return StreamBuilder<QuerySnapshot>(
           stream: reservationStream,

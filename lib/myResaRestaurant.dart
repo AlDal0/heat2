@@ -1,7 +1,6 @@
 import 'myResaHome.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -11,15 +10,17 @@ String imgList = '';
 
 class MyResaRestaurant extends StatefulWidget {
 
-  final ScrollController mainControllerRestaurant;
+  //final ScrollController mainControllerRestaurant;
 
-  const MyResaRestaurant(this.mainControllerRestaurant, {Key? key}) : super(key: key);
+  //const MyResaRestaurant(this.mainControllerRestaurant, {Key? key}) : super(key: key);
+  const MyResaRestaurant({Key? key}) : super(key: key);
   @override
     _MyResaRestaurantState createState() => _MyResaRestaurantState();
 }
 
 class _MyResaRestaurantState extends State<MyResaRestaurant> {
-  final Stream<QuerySnapshot> clientStream = FirebaseFirestore.instance.collection('client').where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid).where('type', isEqualTo: 'Restaurant').snapshots();
+
+  final Stream<QuerySnapshot> clientStream = FirebaseFirestore.instance.collection('client').where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid).snapshots();
   
   final Stream<QuerySnapshot> menuStream = FirebaseFirestore.instance.collection('menu').snapshots();
 
@@ -38,9 +39,10 @@ class _MyResaRestaurantState extends State<MyResaRestaurant> {
         
         DocumentReference<Map<String, dynamic>> clientRef;
         final clientData = clientSnapshot.requireData;
+
         clientRef = db.collection('client').doc(clientData.docs[0].id);
 
-        final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').where('client', isEqualTo: clientRef).snapshots();
+        final Stream<QuerySnapshot> reservationStream = FirebaseFirestore.instance.collection('reservation').where('client', isEqualTo: clientRef).where('type', isEqualTo: 'Restaurant').snapshots();
 
         return StreamBuilder<QuerySnapshot>(
           stream: reservationStream,
@@ -121,12 +123,8 @@ Future<String> getMenuImagesMini(String menuSelectedToGetImage, menuSnapshotData
         try {
 
           final image1Url = await storageRef.child(data['image1']).getDownloadURL();
-          // final image2Url = await storageRef.child(data['image2']).getDownloadURL();
-          // final image3Url = await storageRef.child(data['image3']).getDownloadURL();
 
           imgList = image1Url;
-          // imgList.add(image2Url);
-          // imgList.add(image3Url);
 
         } on FirebaseException catch (e) {
         // Handle any errors.
@@ -200,7 +198,7 @@ class ResaContent extends StatelessWidget {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: 380,
+                          height: 400,
                           child: Card(
                           clipBehavior: Clip.antiAlias,
                           child: Column(
@@ -248,13 +246,19 @@ class ResaContent extends StatelessWidget {
                                         Padding(
                                           padding: const EdgeInsets.only(bottom: 4),
                                           child: Text(
-                                            'Start : $tsdateStart -> End : $tsdateEnd',
+                                            'Start : $tsdateStart',
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(bottom: 4),
+                                          child: Text(
+                                            'End : $tsdateEnd',
                                           ),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.only(bottom: 0),
                                           child: Text(
-                                            'Total length : ${reservationData.docs[index].get('length')} night(s)',
+                                            'Total length : ${reservationData.docs[index].get('length')}',
                                           ),
                                         ),
                                         Padding(

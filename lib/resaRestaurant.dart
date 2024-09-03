@@ -38,11 +38,6 @@ var imgMini;
 
 
 List<String> getMenus(menuSnapshotData) {
-  //final snapshot = await db.collection('room').get();
-
-  //var twoDList = List<List>.generate(roomSnapshotData.docs.length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
-
-  //print(roomSnapshotData.docs.length);
 
   List<String> getMenus = [];
 
@@ -57,8 +52,6 @@ List<String> getMenus(menuSnapshotData) {
 }
 
 int getMenuPrice(menuSnapshotData, menuSelected) {
-
-  //print(roomSelected);
 
   int menuSelectedPrice = 0;
 
@@ -76,8 +69,6 @@ int getMenuPrice(menuSnapshotData, menuSelected) {
 }
 
 String getMenuCurrency(menuSnapshotData, menuSelected) {
-
-  //print(roomSelected);
 
   String menuSelectedCurrency = "";
 
@@ -104,9 +95,6 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> menuSelectedListToB
     late DocumentReference clientId;
     num resaAmountDay = 0;
     String resaCurrency = "";
-     
-
-    //if (dateStart != null && dateEnd != null) {
 
     var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
 
@@ -160,41 +148,51 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> menuSelectedListToB
 
     }
 
-    var mappingAdded = {
-      for (var item in List.generate(dateRange.length, (index) => index)) dateRange[item] : List.generate(menuSelectedListToBook.length,(i) {
-          return menuSelectedListToBook[i];
-        })
-          ..addAll({})
-    };
-
-
-
-
-    //DateTime.utc(dateStart.toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
-
     final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
     final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
-    final length = dateRange.length-1;
+    final length = dateRange.length;
 
     final resaAmountTotal = resaAmountDay * length;
+    
+    if (length == 1) {
+      await reservation.add({
+        'dateStart': dateStart,
+        'dateEnd': dateEnd,
+        'length': "$length day",
+        'menu': menuId,
+        'client': clientId,
+        'type': 'Restaurant',
+        'totalAmount': resaAmountTotal,
+        'currency': resaCurrency,
+        'status': 'created',
+        'publisher': 'client',
+        'to': [FirebaseAuth.instance.currentUser!.email],
+        'message': {
+          'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+          'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length day <br></br> Menus : ${menuSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        }
+      });
+    }
 
-    await reservation.add({
-      'dateStart': dateStart,
-      'dateEnd': dateEnd,
-      'length': length,
-      'menu': menuId,
-      'client': clientId,
-      'type': 'Restaurant',
-      'totalAmount': resaAmountTotal,
-      'currency': resaCurrency,
-      'status': 'created',
-      'publisher': 'client',
-      'to': [FirebaseAuth.instance.currentUser!.email],
-      'message': {
-        'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length nights <br></br> Menus : ${menuSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
-      }
-    });
+    else {
+      await reservation.add({
+        'dateStart': dateStart,
+        'dateEnd': dateEnd,
+        'length': "$length days",
+        'menu': menuId,
+        'client': clientId,
+        'type': 'Restaurant',
+        'totalAmount': resaAmountTotal,
+        'currency': resaCurrency,
+        'status': 'created',
+        'publisher': 'client',
+        'to': [FirebaseAuth.instance.currentUser!.email],
+        'message': {
+          'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+          'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length days <br></br> Menus : ${menuSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        }
+      });
+    }
     
     onRangeSelectedFunction(dateStart, dateEnd, dateStart);
 
@@ -254,10 +252,7 @@ getMenuImages(String menuSelectedToGetImage, menuSnapshotData) async {
 
 Future<List<String>> getMenuDetails(int index, menuSnapshotData) async {
 
-    //print(menuData.requireData);
-
     List<String> menuDetailsList = [];
-    //print(imgMenu);
 
           try {
 
@@ -273,8 +268,6 @@ Future<List<String>> getMenuDetails(int index, menuSnapshotData) async {
           // Handle any errors.
           } 
 
-      //}
-      //print(menuDetailsList);
       return menuDetailsList;
 }
 
@@ -555,17 +548,9 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
 
     var key = GlobalKey();
 
-    //print(getRooms(roomSnapshot.requireData));
-
-    //var twoDList = List<List>.generate(getRooms(roomSnapshot.requireData).length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
-
     var menuPrice = getMenuPrice(menuSnapshot.requireData, menuSelected);
 
     var menuCurrency = getMenuCurrency(menuSnapshot.requireData, menuSelected);
-
-  //twoDList[0][1] = "deneme";
-
-  //print(twoDList);
 
     return InkWell(
       onTap: () {
@@ -608,18 +593,6 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
             menuSelectedList.add(menuSelected);
 
             buttonenabled = true;
-
-            //print(menuSelectedList);
-
-            //_mainController.jumpTo(_mainController.positions.last.maxScrollExtent);
-            //if (index > 2) {
-
-            //scrollController.animateTo(scrollController.positions.last.maxScrollExtent, duration: Duration(seconds: 1), curve: Curves.ease);
-
-            //scrollController.animateTo(index * 90, duration: Duration(seconds: 1), curve: Curves.ease);
-            //}
-
-            
 
             mainScrollController.animateTo(mainScrollController.positions.last.maxScrollExtent, duration: const Duration(seconds: 1), curve: Curves.ease);
             //Duration(seconds: 1), Curves.ease
@@ -685,8 +658,6 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
       stream: menuStream,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> menuSnapshot) {
 
-        //print(pixelRatio);
-
         if (menuSnapshot.hasError) {
           return const Text('Something went wrong');
         }
@@ -694,11 +665,7 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        //resaDateList = getResaDate(reservationSnapshot.requireData);
-        //resaMapping = getResa(reservationSnapshot.requireData, roomSnapshot.requireData);
         menuList = getMenus(menuSnapshot.requireData);
-
-        //print(menuList);
 
         final ScrollController scrollControllerList = ScrollController();
 
@@ -706,7 +673,7 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
           //crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 5,
+            flex: 6,
             child:
               Container(
                 padding: const EdgeInsets.only(right: 15.0),
@@ -855,9 +822,6 @@ class _ResaRestaurantState extends State<ResaRestaurant> {
                             future: getMenuMiniImage(menuList[index].toString(), menuSnapshot.requireData),
                             builder: (context, AsyncSnapshot<String> snapshot){
                               if (snapshot.hasData) {
-                          //getRoomMiniImage(result[index].toString(), roomSnapshot.requireData);
-                          //print(result[index]);
-                          //getRoomImages(result[index].toString(), roomSnapshot.requireData);
                                 return _getListItemTile(context, index, menuList[index].toString(), menuSnapshot, snapshot.data, widget.mainControllerRestaurant);
                               }
                               else {
@@ -983,9 +947,6 @@ class _DetailsButtonState extends State<DetailsButton> {
         
         await getMenuImages(widget.menuSelected, widget.menuSnapshot.requireData);
         menuDetailsList = await getMenuDetails(widget.index, widget.menuSnapshot.requireData);
-        //globals.widgetlist = getListWidget(widget.room_selected);
-
-        //print(menuDetailsList);
 
         _navigateAndDisplaySelection(menuDetailsList);
       },

@@ -166,10 +166,6 @@ getoccurences(DateTime date) {
 List<Event> getRooms(roomSnapshotData) {
   //final snapshot = await db.collection('room').get();
 
-  //var twoDList = List<List>.generate(roomSnapshotData.docs.length, (i) => List<dynamic>.generate(2, (index) => null, growable: false), growable: false);
-
-  //print(roomSnapshotData.docs.length);
-
   List<Event> getRooms = [];
 
   for (final document in roomSnapshotData.docs) {
@@ -183,8 +179,6 @@ List<Event> getRooms(roomSnapshotData) {
 }
 
 int getRoomPrice(roomSnapshotData, roomSelected) {
-
-  //print(roomSelected);
 
   int roomSelectedPrice = 0;
 
@@ -202,8 +196,6 @@ int getRoomPrice(roomSnapshotData, roomSelected) {
 }
 
 String getRoomCurrency(roomSnapshotData, roomSelected) {
-
-  //print(roomSelected);
 
   String roomSelectedCurrency = "";
 
@@ -230,9 +222,6 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     late DocumentReference clientId;
     num resaAmountDay = 0;
     String resaCurrency = "";
-     
-
-    //if (dateStart != null && dateEnd != null) {
 
     var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
 
@@ -314,31 +303,50 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
 
     }
 
-    //DateTime.utc(dateStart.toDate().year,data['dateStart'].toDate().month,data['dateStart'].toDate().day);
-
     final dateStartEmail = DateFormat.yMMMMd('en_EN').format(dateStart);
     final dateEndEmail = DateFormat.yMMMMd('en_EN').format(dateEnd!);
     final length = dateRange.length-1;
 
     final resaAmountTotal = resaAmountDay * length;
 
-    await reservation.add({
-      'dateStart': dateStart,
-      'dateEnd': dateEnd,
-      'length': length,
-      'room': roomId,
-      'client': clientId,
-      'type': 'Room',
-      'totalAmount': resaAmountTotal,
-      'currency': resaCurrency,
-      'status': 'created',
-      'publisher': 'client',
-      'to': [FirebaseAuth.instance.currentUser!.email],
-      'message': {
-        'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
-        'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length nights <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
-      }
-    });
+    if (length == 1) {
+      await reservation.add({
+        'dateStart': dateStart,
+        'dateEnd': dateEnd,
+        'length': "$length night",
+        'room': roomId,
+        'client': clientId,
+        'type': 'Room',
+        'totalAmount': resaAmountTotal,
+        'currency': resaCurrency,
+        'status': 'created',
+        'publisher': 'client',
+        'to': [FirebaseAuth.instance.currentUser!.email],
+        'message': {
+          'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+          'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length night <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        }
+      });
+    }
+    else {
+      await reservation.add({
+        'dateStart': dateStart,
+        'dateEnd': dateEnd,
+        'length': "$length nights",
+        'room': roomId,
+        'client': clientId,
+        'type': 'Room',
+        'totalAmount': resaAmountTotal,
+        'currency': resaCurrency,
+        'status': 'created',
+        'publisher': 'client',
+        'to': [FirebaseAuth.instance.currentUser!.email],
+        'message': {
+          'subject': 'Reservation at Heat from $dateStartEmail to $dateEndEmail confirmed',
+          'html': '<code><body style="text-align:center; font-family:Verdana;"><h1>Thank you $clientSurnameEmail $clientNameEmail for your reservation !</h1>  <br></br> Please find the details: <br></br> Start date: $dateStartEmail / End date: $dateEndEmail <br></br> Total length of stay: $length nights <br></br> Rooms : ${roomSelectedListToBookAndPrice.join(', ')} <br></br><br></br> Total amount: $resaAmountTotal $resaCurrency <br></body></code>',
+        }
+      });
+    }
     
     onRangeSelectedFunction(dateStart, dateEnd, dateStart);
 
@@ -453,8 +461,6 @@ class _ResaRoomState extends State<ResaRoom> {
     _bookedRooms = ValueNotifier(_getEventsForDay(_selectedDay!));
     _selectedDate = ValueNotifier(_getDatesForDay(_selectedDay!,_selectedDay!));
     roomSelectedList = [];
-
-   
     
   }
 
@@ -835,7 +841,7 @@ class _ResaRoomState extends State<ResaRoom> {
           //crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 6,
+            flex: 7,
             child:
               Container(
                 padding: const EdgeInsets.only(right: 15.0),
@@ -860,7 +866,7 @@ class _ResaRoomState extends State<ResaRoom> {
                     outsideDaysVisible: false,
                     isTodayHighlighted: false,
                     markersAlignment: Alignment.bottomRight,
-                    defaultTextStyle: TextStyle(fontSize: 10)
+                    defaultTextStyle: TextStyle(fontSize: 15)
                     //weekendDecoration: BoxDecoration(
                     //  shape: BoxShape.rectangle,
                     //  color: Color.fromARGB(255, 239, 241, 236),
@@ -1008,8 +1014,7 @@ class _ResaRoomState extends State<ResaRoom> {
               ValueListenableBuilder<List<Event>>(
                   valueListenable: _bookedRooms,
                   builder: (context, value, _) {
-                    //print(_bookedRooms);
-              
+
                     final List<Event> result = [];
                       
                     for (var j = 0; j < roomList.length; j++) {
@@ -1054,7 +1059,7 @@ class _ResaRoomState extends State<ResaRoom> {
                             builder: (context, AsyncSnapshot<String> snapshot){
                               if (snapshot.hasData) {
                           //getRoomMiniImage(result[index].toString(), roomSnapshot.requireData);
-                          //print(result[index]);
+
                           //getRoomImages(result[index].toString(), roomSnapshot.requireData);
                                 return _getListItemTile(context, index, result[index].toString(), roomSnapshot, snapshot.data, widget.mainControllerRoom);
                               }
