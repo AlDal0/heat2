@@ -29,7 +29,7 @@ void main() async {
               initialRoute: '/login',
               theme: ThemeData(
                   useMaterial3: true,
-                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlueAccent),
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo.shade400),
                 ),
               routes: {
                 // When navigating to the "/" route, build the FirstScreen widget.

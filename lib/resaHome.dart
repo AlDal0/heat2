@@ -23,8 +23,9 @@ class ResaHome extends StatelessWidget {
             title: const Text('Booking'),
             toolbarHeight: 30,
             scrolledUnderElevation: 0,
-            bottom: const TabBar(
-            tabs: <Widget>[
+            bottom: TabBar(
+              labelColor:Colors.indigo.shade400,
+            tabs: const <Widget>[
               Tab(
                 icon: Icon(Icons.bed),
               ),

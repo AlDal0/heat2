@@ -502,21 +502,21 @@ class _ResaRoomState extends State<ResaRoom> {
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
 
-    if (!isSameDay(_selectedDay, selectedDay)) {
+      if (!isSameDay(_selectedDay, selectedDay)) {
       
       setState(() {
         roomSelectedList = [];
         for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        _rangeStart = null; // Important to clean those
-        _rangeEnd = null; 
+        _rangeStart = selectedDay; // Important to clean those
+        _rangeEnd = DateTime(selectedDay.year, selectedDay.month, selectedDay.day + 1); 
         _rangeSelectionMode = RangeSelectionMode.toggledOff;
         
       });
 
       _bookedRooms.value = _getEventsForDay(selectedDay);
-      _selectedDate.value = _getDatesForDay(selectedDay,selectedDay);
+      _selectedDate.value = _getDatesForDay(selectedDay,DateTime(selectedDay!.year, selectedDay!.month, selectedDay!.day + 1));
 
     }
   }
@@ -559,17 +559,19 @@ class _ResaRoomState extends State<ResaRoom> {
       }
     }
     else {
-      setState(() {
-        roomSelectedList = [];
-        for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
-        _selectedDay = focusedDay;
-        _selectedDay = focusedDay;
-        _focusedDay = focusedDay;
-        _rangeStart = start;
-        _rangeEnd = end;
-        _rangeSelectionMode = RangeSelectionMode.toggledOn;
-      });
       if (start != null && end != null) {
+
+        setState(() {
+          roomSelectedList = [];
+          for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
+          _selectedDay = focusedDay;
+          _selectedDay = focusedDay;
+          _focusedDay = focusedDay;
+          _rangeStart = start;
+          _rangeEnd = end;
+          _rangeSelectionMode = RangeSelectionMode.toggledOn;
+        });
+
         var a = _getEventsForRange(start, end);
 
         var sorted = a;
@@ -583,8 +585,30 @@ class _ResaRoomState extends State<ResaRoom> {
         _bookedRooms.value = uniquelist;
         _selectedDate.value = _getDatesForDay(start, end);
       } else if (start != null) {
-        _bookedRooms.value = _getEventsForDay(start);
-        _selectedDate.value = _getDatesForDay(start, start);
+
+        setState(() {
+          roomSelectedList = [];
+          for (var element in listRoom) { element.isSelected = false; buttonenabled = false; }
+          _selectedDay = focusedDay;
+          _selectedDay = focusedDay;
+          _focusedDay = focusedDay;
+          _rangeStart = start;
+          _rangeEnd = DateTime.utc(start.year, start.month, start.day + 1);
+          _rangeSelectionMode = RangeSelectionMode.toggledOn;
+        });
+
+        var a = _getEventsForRange(start, DateTime.utc(start.year, start.month, start.day + 1));
+
+        var sorted = a;
+
+        sorted.sort((a, b) => a.room.compareTo(b.room));
+
+        var seen = Set<String>();
+        List<Event> uniquelist = sorted.where((event) =>
+            seen.add(event.room)).toList();
+        
+        _bookedRooms.value = uniquelist;
+        _selectedDate.value = _getDatesForDay(start, DateTime(start!.year, start!.month, start!.day + 1));
       } else if (end != null) {
         _bookedRooms.value = _getEventsForDay(end);
         _selectedDate.value = _getDatesForDay(end, end);
