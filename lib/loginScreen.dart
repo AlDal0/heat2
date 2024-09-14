@@ -69,17 +69,55 @@ class _SignUpFormState extends State<LoginForm> {
       await FirebaseAuth.instance.signOut();
       
         if (_formKey.currentState!.validate()) {
+          // try {
+
+          // await auth
+          //   .signInWithEmailAndPassword(
+          //       email: _emailTextController.text, password: _passwordTextController.text)
+          //   .then((value) { setState(() {
+
+          //     print('value');
+
+          //     user = FirebaseAuth.instance.currentUser;
+
+          //   });
+
+          //    Navigator.pushReplacement(
+          //             context,
+          //             MaterialPageRoute(
+          //               builder: (context) => const Accueil(),
+          //             ),
+          //           );
+          //       ScaffoldMessenger.of(context)
+          //         .showSnackBar(
+          //           const SnackBar(
+          //             content: Text("Successfully logged in"),
+          //           ),
+          //         )
+          //         .closed;
+          //     }
+          //   )
+          //   .onError((error, stackTrace) {
+                
+          //       ScaffoldMessenger.of(context)
+          //           .showSnackBar(
+          //             const SnackBar(
+          //               content: Text('Wrong data submitted'),
+          //             ),
+          //           )
+          //           .closed;
+          //       throw('Failed with error code: $error / $stackTrace');
+          //     });
+          //  } on FirebaseAuthException catch  (e) {
+          //   throw('Failed with error code: ${e.code} / ${e.message}');
+          // }
           try {
-          await auth
-            .signInWithEmailAndPassword(
-                email: _emailTextController.text, password: _passwordTextController.text)
-            .then((value) { setState(() {
+  final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+    email: _emailTextController.text,
+    password: _passwordTextController.text
+  );
 
-              user = FirebaseAuth.instance.currentUser;
-
-            });
-
-             Navigator.pushReplacement(
+   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const Accueil(),
@@ -92,22 +130,15 @@ class _SignUpFormState extends State<LoginForm> {
                     ),
                   )
                   .closed;
-              }
-            )
-            .onError((error, stackTrace) {
-                
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(
-                      const SnackBar(
-                        content: Text('Wrong data submitted'),
-                      ),
-                    )
-                    .closed;
-                throw('Failed with error code: $error / $stackTrace');
-              });
-           } on FirebaseAuthException catch  (e) {
-            throw('Failed with error code: ${e.code} / ${e.message}');
-          }
+              
+            
+} on FirebaseAuthException catch (e) {
+  if (e.code == 'user-not-found') {
+    print('No user found for that email.');
+  } else if (e.code == 'wrong-password') {
+    print('Wrong password provided for that user.');
+  }
+}
       }
     }
 

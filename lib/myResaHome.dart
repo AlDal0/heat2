@@ -23,8 +23,9 @@ class MyResaHome extends StatelessWidget {
         appBar: AppBar(
           title: const Text('My Reservations'),
           scrolledUnderElevation: 0,
-          bottom: const TabBar(
-            tabs: <Widget>[
+          bottom: TabBar(
+            labelColor:Colors.indigo.shade400,
+            tabs: const <Widget>[
               Tab(
                 icon: Icon(Icons.bed),
               ),

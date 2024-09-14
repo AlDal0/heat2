@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
+import 'resaSummaryArguments.dart';
 
 
 Map<DateTime, List<Event>> resaMapping= {DateTime(2021,1,1): [const Event('room')]};
@@ -212,6 +213,111 @@ String getRoomCurrency(roomSnapshotData, roomSelected) {
 
 }
 
+prepareResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToBook) async {
+  final snapshot1 = await db.collection('room').get();
+  final snapshot2 = await db.collection('client').get();
+  List<DocumentReference> roomId = [];
+  List<String> roomName = [];
+  List<DateTime> dateRange = [];
+  List<String> roomSelectedListToBookAndPrice = [];
+  late DocumentReference clientId;
+  num resaAmountDay = 0;
+  String resaCurrency = "";
+
+  var date = DateTime(dateStart!.year, dateStart.month, dateStart.day);
+
+  String clientName = "";
+  String clientSurname = "";
+
+  Map<String, dynamic> resaDetails = {};
+
+  dateRange.add(date);
+
+  if (dateStart != dateEnd) {
+    do {
+
+      date = DateTime(date.year, date.month, date.day + 1);
+
+      dateRange.add(date);
+
+    }
+    while (DateTime(date.year, date.month, date.day) != DateTime(dateEnd!.year, dateEnd.month, dateEnd.day));
+
+  }
+
+
+
+  for (final document1 in snapshot1.docs) {
+
+      final data1 = document1.data();
+      if (resaCurrency == "") {
+        resaCurrency = data1['currency'];
+      }
+
+      if (roomSelectedListToBook.contains(data1['name'])) {
+
+        roomId.add(db.doc('/room/${document1.id}'));
+
+        roomName.add(data1['name']);
+
+        resaAmountDay = resaAmountDay + data1['price'];
+        
+        roomSelectedListToBookAndPrice.add(data1['name']+ ' (' + data1['price'].toString() + ' $resaCurrency / night)');
+
+    }
+
+  }
+
+  for (final document2 in snapshot2.docs) {
+
+      final data2 = document2.data();
+
+      if (FirebaseAuth.instance.currentUser!.email!.contains(data2['email'])) {
+
+        clientId = db.doc('/client/${document2.id}');
+        clientName = data2['surname'];
+        clientSurname = data2['firstName'];
+
+      }
+
+  }
+
+
+  final length = dateRange.length-1;
+
+  final resaAmountTotal = resaAmountDay * length;
+
+  //if (length == 1) {
+    resaDetails.addAll({'dateStart': dateStart});
+    resaDetails.addAll({'dateEnd': dateEnd});
+    resaDetails.addAll({'length': length});
+    resaDetails.addAll({'room': roomName});
+    resaDetails.addAll({'client': clientId});
+    resaDetails.addAll({'client': clientName});
+    resaDetails.addAll({'client': clientSurname});
+    resaDetails.addAll({'type': 'Room'});
+    resaDetails.addAll({'totalAmount': resaAmountTotal});
+    resaDetails.addAll({'currency': resaCurrency});
+
+  // }
+  // else {
+  //   resaDetails.addAll({'dateStart': dateStart});
+  //   resaDetails.addAll({'dateEnd': dateEnd});
+  //   resaDetails.addAll({'length': "$length nights"});
+  //   resaDetails.addAll({'room': roomId});
+  //   resaDetails.addAll({'client': clientId});
+  //   resaDetails.addAll({'client': clientName});
+  //   resaDetails.addAll({'client': clientSurname});
+  //   resaDetails.addAll({'type': 'Room'});
+  //   resaDetails.addAll({'totalAmount': resaAmountTotal});
+  //   resaDetails.addAll({'currency': resaCurrency});
+  // }
+
+
+  return resaDetails;
+
+}
+
 addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToBook, void onRangeSelectedFunction(DateTime? start, DateTime? end, DateTime focusedDay)) async {
     CollectionReference reservation = FirebaseFirestore.instance.collection('reservation');
     final snapshot1 = await db.collection('room').get();
@@ -308,6 +414,8 @@ addResa(DateTime? dateStart, DateTime? dateEnd, List<String> roomSelectedListToB
     final length = dateRange.length-1;
 
     final resaAmountTotal = resaAmountDay * length;
+
+    
 
     if (length == 1) {
       await reservation.add({
@@ -720,6 +828,7 @@ class _ResaRoomState extends State<ResaRoom> {
     var roomCurrency = getRoomCurrency(roomSnapshot.requireData, roomSelected);
 
     return InkWell(
+      splashColor: Colors.blue.withAlpha(30),
       onTap: () {
 
         Scrollable.ensureVisible(key.currentContext!, alignment: 0.5, duration: const Duration(seconds: 1));
@@ -1146,16 +1255,26 @@ class _ResaRoomState extends State<ResaRoom> {
                     //   backgroundColor: MaterialStateProperty.all<Color>(Colors.indigo.shade400),
                     //   foregroundColor: MaterialStateProperty.all<Color>(Colors.white)),
                       
-                    onPressed:buttonenabled?(){ //if buttonenabled == true then pass a function otherwise pass "null"
+                    onPressed:buttonenabled?() async { //if buttonenabled == true then pass a function otherwise pass "null"
                         if(_rangeStart == null && _rangeEnd == null) {
-                          addResa(_selectedDay, _selectedDay, roomSelectedList, _onRangeSelected);
+                          var resaDetails = await prepareResa(_selectedDay, _selectedDay, roomSelectedList);
+                          Navigator.pushNamed(context, '/resaSummary', arguments: ResaSummaryArguments(resaDetails['dateStart'], resaDetails['dateEnd'], resaDetails['length'], resaDetails['room'], resaDetails['client'], resaDetails['type'], resaDetails['totalAmount'], resaDetails['currency']));
+                          //addResa(_selectedDay, _selectedDay, roomSelectedList, _onRangeSelected);
                         }
                         else if (_rangeEnd == null) {
                           _rangeEnd = _rangeStart;
-                          addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
+                          var resaDetails = await prepareResa(_rangeStart, _rangeEnd, roomSelectedList);
+                          //prepareResa(_rangeStart, _rangeEnd, roomSelectedList);
+
+                          Navigator.pushNamed(context, '/resaSummary', arguments: ResaSummaryArguments(resaDetails['dateStart'], resaDetails['dateEnd'], resaDetails['length'], resaDetails['room'], resaDetails['client'], resaDetails['type'], resaDetails['totalAmount'], resaDetails['currency']));
+                          //addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
                         }
                         else {
-                          addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
+                          var resaDetails = await prepareResa(_rangeStart, _rangeEnd, roomSelectedList);
+                          //prepareResa(_rangeStart, _rangeEnd, roomSelectedList);
+
+                          Navigator.pushNamed(context, '/resaSummary', arguments: ResaSummaryArguments(resaDetails['dateStart'], resaDetails['dateEnd'], resaDetails['length'], resaDetails['room'], resaDetails['client'], resaDetails['type'], resaDetails['totalAmount'], resaDetails['currency']));
+                          //addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
                         }
                         ScaffoldMessenger.of(context)
                           ..removeCurrentSnackBar()
@@ -1290,7 +1409,7 @@ class CarouselWithIndicatorDemo extends StatefulWidget {
 
 class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   int _current = 0;
-  final CarouselController _controller = CarouselController();
+  final CarouselSliderController _controller = CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -1350,4 +1469,3 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
     );
   }
 }
-

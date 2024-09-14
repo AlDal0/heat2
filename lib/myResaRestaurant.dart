@@ -158,6 +158,74 @@ Future<Map<String, List<String>>> getMenuImages(menuData) async {
     return menuImagesList;
 }
 
+Future<List<String>> getMenuDetails(int index, menuData) async {
+
+    List<String> menuDetailsList = [];
+    //print(imgMenu);
+
+          try {
+
+            final starter = menuData.docs[index].get('starter');
+            final mainCourse = menuData.docs[index].get('mainCourse');
+            final dessert = menuData.docs[index].get('dessert');
+
+            menuDetailsList.add(starter);
+            menuDetailsList.add(mainCourse);
+            menuDetailsList.add(dessert);
+
+          } on FirebaseException catch (e) {
+          // Handle any errors.
+          } 
+
+      //}
+      //print(menuDetailsList);
+      return menuDetailsList;
+}
+
+List<Widget> getListWidget(int index, String menuSelected, AsyncSnapshot<Map<String, List<String>>> menuImages, AsyncSnapshot<List<String>> menuDetails) {
+
+List<Widget> imageSliders = menuImages.data![menuSelected.toString()]!
+    .map((item) => Container(
+      margin: const EdgeInsets.all(5.0),
+      child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          child: Stack(
+            children: <Widget>[
+              Image.network(item, fit: BoxFit.cover, width: 1000.0),
+              Positioned(
+                bottom: 0.0,
+                left: 0.0,
+                right: 0.0,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(200, 0, 0, 0),
+                        Color.fromARGB(0, 0, 0, 0)
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 20.0),
+                  child: Text(
+                    menuDetails.data![menuImages.data![menuSelected.toString()]!.indexOf(item)],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )),
+    ))
+    .toList();
+    return imageSliders;
+}
+
 class ResaContent extends StatelessWidget {
   const ResaContent({super.key, required this.context, required this.index, required this.reservationData, required this.menuData, required this.tempList});
 
@@ -187,118 +255,127 @@ class ResaContent extends StatelessWidget {
             future: getMenuImagesMini(tempList[0].toString(), menuData),
             builder: (context, AsyncSnapshot<String> snapshot2){
               if (snapshot2.hasData) {
-                
-                tempList.sort();
-              
-                return SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 400,
-                          child: Card(
-                          clipBehavior: Clip.antiAlias,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 184,
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      // In order to have the ink splash appear above the image, you
-                                      // must use Ink.image. This allows the image to be painted as
-                                      // part of the Material and display ink effects above it. Using
-                                      // a standard Image will obscure the ink splash.
-                                      child: Ink.image(
-                                        image: CachedNetworkImageProvider(snapshot2.data.toString()),
-                                        fit: BoxFit.cover,
-                                        child: Container(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // Description and share/explore buttons.
-                              Semantics(
-                                container: true,
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                                  child: DefaultTextStyle(
-                                    softWrap: false,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: descriptionStyle,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                return FutureBuilder<List<String>>(
+                  future: getMenuDetails(index, menuData),
+                  builder: (context, AsyncSnapshot<List<String>> snapshot3){
+                  if (snapshot3.hasData) {
+                    tempList.sort();
+                  
+                    return SafeArea(
+                      top: false,
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 400,
+                              child: Card(
+                              clipBehavior: Clip.antiAlias,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 184,
+                                    child: Stack(
                                       children: [
-                                        // This array contains the three line description on each card
-                                        // demo.
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 8),
-                                          child: Text(
-                                            'Reservation : ${reservationData.docs[index].id}',
-                                            style: descriptionStyle.copyWith(color: Colors.black54),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 4),
-                                          child: Text(
-                                            'Start : $tsdateStart',
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 4),
-                                          child: Text(
-                                            'End : $tsdateEnd',
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 0),
-                                          child: Text(
-                                            'Total length : ${reservationData.docs[index].get('length')}',
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 4),
-                                          child: Row(children: [
-                                            const Text('Menus: '),
-                                            for (var i = 0; i < 3; i++)
-                                              if (i < tempList.length) 
-                                                TextButton(
-                                                  onPressed: () async {
-
-                                                    _navigateAndDisplaySelection(context, index, snapshot1, tempList[i]);
-                                                  },
-                                                  style: TextButton.styleFrom(
-                                                    textStyle: const TextStyle(fontSize: 15),
-                                                  ),
-                                                  child: Text(tempList[i]),
-                                                )
-                                          ]),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(bottom: 0),
-                                          child: Text(
-                                            'Total amount : ${reservationData.docs[index].get('totalAmount')} EUR',
-                                            style: const TextStyle(fontWeight:FontWeight.bold)
+                                        Positioned.fill(
+                                          // In order to have the ink splash appear above the image, you
+                                          // must use Ink.image. This allows the image to be painted as
+                                          // part of the Material and display ink effects above it. Using
+                                          // a standard Image will obscure the ink splash.
+                                          child: Ink.image(
+                                            image: CachedNetworkImageProvider(snapshot2.data.toString()),
+                                            fit: BoxFit.cover,
+                                            child: Container(),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          )
-                          )
-                        )
-                      ]
-                )
-                )
-                );
+                                  // Description and share/explore buttons.
+                                  Semantics(
+                                    container: true,
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                                      child: DefaultTextStyle(
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: descriptionStyle,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // This array contains the three line description on each card
+                                            // demo.
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 8),
+                                              child: Text(
+                                                'Reservation : ${reservationData.docs[index].id}',
+                                                style: descriptionStyle.copyWith(color: Colors.black54),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 4),
+                                              child: Text(
+                                                'Start : $tsdateStart',
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 4),
+                                              child: Text(
+                                                'End : $tsdateEnd',
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 0),
+                                              child: Text(
+                                                'Total length : ${reservationData.docs[index].get('length')}',
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 4),
+                                              child: Row(children: [
+                                                const Text('Menus: '),
+                                                for (var i = 0; i < 3; i++)
+                                                  if (i < tempList.length) 
+                                                    TextButton(
+                                                      onPressed: () async {
+
+                                                        _navigateAndDisplaySelection(context, index, snapshot1, menuData.docs[index].get('name'), snapshot3);
+                                                      },
+                                                      style: TextButton.styleFrom(
+                                                        textStyle: const TextStyle(fontSize: 15),
+                                                      ),
+                                                      child: Text(tempList[i]),
+                                                    )
+                                              ]),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(bottom: 0),
+                                              child: Text(
+                                                'Total amount : ${reservationData.docs[index].get('totalAmount')} EUR',
+                                                style: const TextStyle(fontWeight:FontWeight.bold)
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                              )
+                            )
+                          ]
+                    )
+                    )
+                    );
+                  }
+                  else {
+                    return const CircularProgressIndicator();
+                  }
+                }
+            );
           } else {
             return const CircularProgressIndicator();
           }
@@ -312,13 +389,13 @@ class ResaContent extends StatelessWidget {
   }
 }
 
-Future<void> _navigateAndDisplaySelection(BuildContext context, int index, AsyncSnapshot<Map<String, List<String>>> menuData, String menuSelected) async {
+Future<void> _navigateAndDisplaySelection(BuildContext context, int index, AsyncSnapshot<Map<String, List<String>>> menuImages, String menuSelected, AsyncSnapshot<List<String>> menuDetails) async {
     // Navigator.push returns a Future that completes after calling
     // Navigator.pop on the Selection Screen.
 
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(index, menuData, menuSelected)),
+      MaterialPageRoute(builder: (context) => CarouselWithIndicatorDemo(index, menuSelected, menuImages, menuDetails)),
     );
 
     
@@ -328,18 +405,17 @@ Future<void> _navigateAndDisplaySelection(BuildContext context, int index, Async
 class CarouselWithIndicatorDemo extends StatefulWidget {
   
   final int index;
-  final AsyncSnapshot<Map<String, List<String>>> menuImages;
   final String menuSelected;
-  
-
+  final AsyncSnapshot<Map<String, List<String>>> menuImages;
+  final AsyncSnapshot<List<String>> menuDetails;
 
   const CarouselWithIndicatorDemo(
     this.index,
-    this.menuImages,
     this.menuSelected,
+    this.menuImages,
+    this.menuDetails,
     {super.key}
     );
-
 
   @override
   State<StatefulWidget> createState() {
@@ -349,7 +425,7 @@ class CarouselWithIndicatorDemo extends StatefulWidget {
 
 class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   int _current = 0;
-  final CarouselController _controller = CarouselController();
+  final CarouselSliderController _controller = CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +441,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
         children: [
         //Expanded(
           CarouselSlider(
-            items: getListWidget(widget.index, widget.menuImages, widget.menuSelected),
+            items: getListWidget(widget.index, widget.menuSelected, widget.menuImages, widget.menuDetails),
             carouselController: _controller,
             options: CarouselOptions(
                 autoPlay: false,
@@ -411,46 +487,3 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
   }
 }
 
-List<Widget> getListWidget(int index, AsyncSnapshot<Map<String, List<String>>> menuImages, String menuSelected) {
-
-List<Widget> imageSliders = menuImages.data![menuSelected.toString()]!
-    .map((item) => Container(
-      margin: const EdgeInsets.all(5.0),
-      child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-          child: Stack(
-            children: <Widget>[
-              Image.network(item, fit: BoxFit.cover, width: 1000.0),
-              Positioned(
-                bottom: 0.0,
-                left: 0.0,
-                right: 0.0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color.fromARGB(200, 0, 0, 0),
-                        Color.fromARGB(0, 0, 0, 0)
-                      ],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
-                  child: Text(
-                    'Photo ${menuImages.data![menuSelected.toString()]!.indexOf(item)+1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )),
-    ))
-    .toList();
-    return imageSliders;
-}
