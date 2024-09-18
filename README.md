@@ -1,6 +1,11 @@
 # heat
 
-A new Flutter project.
+A project providing all-in-one solution for small businesses combining following Google services :
+- front end : flutter application
+- back end : firebase function
+- database : firebase firestore
+- storage : firebase storage
+- authentication : firebase auth
 
 ## Getting Started
 
