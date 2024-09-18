@@ -1276,9 +1276,9 @@ class _ResaRoomState extends State<ResaRoom> {
                           Navigator.pushNamed(context, '/resaSummary', arguments: ResaSummaryArguments(resaDetails['dateStart'], resaDetails['dateEnd'], resaDetails['length'], resaDetails['room'], resaDetails['client'], resaDetails['type'], resaDetails['totalAmount'], resaDetails['currency']));
                           //addResa(_rangeStart, _rangeEnd, roomSelectedList, _onRangeSelected);
                         }
-                        ScaffoldMessenger.of(context)
-                          ..removeCurrentSnackBar()
-                          ..showSnackBar(const SnackBar(content: Text('Reservation confirmed'),duration: Duration(milliseconds: 1000)));
+                        // ScaffoldMessenger.of(context)
+                        //   ..removeCurrentSnackBar()
+                        //   ..showSnackBar(const SnackBar(content: Text('Reservation confirmed'),duration: Duration(milliseconds: 1000)));
                         
 
                         roomSelectedList = [];
